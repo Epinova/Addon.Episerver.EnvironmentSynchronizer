@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<package xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+		<id>$id$</id>
+		<version>$version$</version>
+		<title>Epinova Environment Synchronizer</title>
+		<authors>Ove Lartelius</authors>
+		<owners>Epinova AB</owners>
+		<iconUrl>https://www.epinova.no/favicon.ico</iconUrl>
+		<projectUrl>https://github.com/ovelartelius/episerver-env-sync</projectUrl>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>Epinova - Episerver environment synchronizer</description>
+		<releaseNotes></releaseNotes>
+		<copyright>Copyright 2020 - Epinova AB</copyright>
+		<tags>Epinova EPiServer SiteDefinition Hostnames ScheduledJobs</tags>
+		<dependencies>
+			<dependency id="EPiServer.CMS.AspNet" version="[11.2.1, 12)" />
+		</dependencies>
+	</metadata>
+	<files>
+		<file src="bin\$id$.pdb" target="bin\net461\" />
+	</files>
+</package>
