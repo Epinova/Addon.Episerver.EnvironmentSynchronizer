@@ -7,7 +7,6 @@ The synchronizer can be run as a InitializationModule or as a ScheduledJob. It d
 
 ## Installation
 This will be packaged as a Nuget package named Addon.Episerver.EnvironmentSynchronizer and put in Episervers Nuget feed once tested a bit more.  
-![NuGet](documentation/EnvironmentSynchronizer_NuGet.jpg)
 
 ## Configuration
 Example web.config
