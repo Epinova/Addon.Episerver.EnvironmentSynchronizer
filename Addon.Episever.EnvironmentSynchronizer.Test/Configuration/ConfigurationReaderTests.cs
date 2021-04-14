@@ -76,10 +76,12 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration.Tests
             Assert.AreEqual("*", data.ScheduledJobs[0].Name);
             Assert.AreEqual("*", data.ScheduledJobs[0].Id);
             Assert.AreEqual(false, data.ScheduledJobs[0].IsEnabled);
+            Assert.AreEqual(false, data.ScheduledJobs[0].AutoRun);
 
             Assert.AreEqual("YourScheduledJob", data.ScheduledJobs[1].Name);
             Assert.AreEqual("", data.ScheduledJobs[1].Id);
             Assert.AreEqual(true, data.ScheduledJobs[1].IsEnabled);
+            Assert.AreEqual(true, data.ScheduledJobs[1].AutoRun);
         }
 
         [TestMethod()]

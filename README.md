@@ -26,7 +26,7 @@ Example web.config
 		</sitedefinitions>
 		<scheduledjobs>
 			<scheduledjob Id="*" Name="*" IsEnabled="false" />
-			<scheduledjob Name="YourScheduledJob" IsEnabled="true" />
+			<scheduledjob Name="YourScheduledJob" IsEnabled="true" AutoRun="true"/>
 		</scheduledjobs>
 	</env.synchronizer>
 ```
@@ -128,9 +128,10 @@ Example 2:
 ```xml
   <schedulejobs>
     <schedulejob Id="*" Name="*" IsEnabled="false" />
-    <schedulejob Id="a42f6137-0bcf-4a88-bbd3-0ef219b7eafa" Name="Empty trashcan" IsEnabled="true" />
+    <schedulejob Id="a42f6137-0bcf-4a88-bbd3-0ef219b7eafa" Name="Empty trashcan" IsEnabled="true" AutoRun="true" />
   </schedulejobs>
   <!-- In this example it first go through all ScheduledJobs and disable them.  
   And then it will enable the job "Episerver-notification". -->
 ```
 **IsEnabled** [bool] set if the job should be enabled/disabled. 
+**AutoRun** [bool] set if the job should be executed on change of environment. This is an optional attribute which will default to false.  Has no effect when used with the wildcard.

@@ -8,6 +8,8 @@ using Addon.Episerver.EnvironmentSynchronizer.DynamicData;
 using Addon.Episerver.EnvironmentSynchronizer.Models;
 using Addon.Episerver.EnvironmentSynchronizer.Synchronizers.ScheduledJobs;
 using EPiServer.DataAbstraction;
+using EPiServer.Scheduler;
+using System.Threading.Tasks;
 
 namespace Addon.Episerver.EnvironmentSynchronizer.Test
 {
@@ -26,7 +28,9 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Test
         public void SynchronizeOneScheduledJob()
         {
             var scheduleJobRepo = new Mock<IScheduledJobRepository>();
-            var configReader = new Mock<IConfigurationReader>();
+			var scheduleJobExecutor = new Mock<IScheduledJobExecutor>();
+
+			var configReader = new Mock<IConfigurationReader>();
 
             scheduleJobRepo.Setup(x => x.List()).Returns(ListOfScheduledJobs);
 
@@ -34,22 +38,49 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Test
             syncData.RunAsInitializationModule = false;
             syncData.RunInitializationModuleEveryStartup = false;
             syncData.ScheduledJobs = new List<ScheduledJobDefinition>();
-            syncData.ScheduledJobs.Add(new ScheduledJobDefinition { Id = "5c7d4c45-2e67-4275-a567-e7b6c98429c2", IsEnabled = true, Name = "Test" });
+            syncData.ScheduledJobs.Add(new ScheduledJobDefinition { Id = "5c7d4c45-2e67-4275-a567-e7b6c98429c2", IsEnabled = true, Name = "Test", AutoRun = false });
             configReader.Setup(x => x.ReadConfiguration()).Returns(syncData);
 
-            var scheduledJobSynchronizer = new ScheduledJobSynchronizer(scheduleJobRepo.Object, configReader.Object);
+            var scheduledJobSynchronizer = new ScheduledJobSynchronizer(scheduleJobRepo.Object, scheduleJobExecutor.Object, configReader.Object);
             var environmentName = "environmentTest";
 
             var resultLog = scheduledJobSynchronizer.Synchronize(environmentName);
 
             Assert.IsTrue(resultLog.Contains("Set Test (5c7d4c45-2e67-4275-a567-e7b6c98429c2) to IsEnabled=True."));
-        }
+			Assert.IsFalse(resultLog.Contains("Ran Test (5c7d4c45-2e67-4275-a567-e7b6c98429c2)."));
+		}
 
-        [TestMethod]
+		[TestMethod]
+		public void SynchronizeOneScheduledJob_WithAutoRun()
+		{
+			var scheduleJobRepo = new Mock<IScheduledJobRepository>();
+			var scheduleJobExecutor = new Mock<IScheduledJobExecutor>();
+
+			var configReader = new Mock<IConfigurationReader>();
+
+			scheduleJobRepo.Setup(x => x.List()).Returns(ListOfScheduledJobs);
+
+			var syncData = new SynchronizationData();
+			syncData.RunAsInitializationModule = false;
+			syncData.RunInitializationModuleEveryStartup = false;
+			syncData.ScheduledJobs = new List<ScheduledJobDefinition>();
+			syncData.ScheduledJobs.Add(new ScheduledJobDefinition { Id = "5c7d4c45-2e67-4275-a567-e7b6c98429c2", IsEnabled = true, Name = "Test", AutoRun = true });
+			configReader.Setup(x => x.ReadConfiguration()).Returns(syncData);
+
+			var scheduledJobSynchronizer = new ScheduledJobSynchronizer(scheduleJobRepo.Object, scheduleJobExecutor.Object, configReader.Object);
+			var environmentName = "environmentTest";
+
+			var resultLog = scheduledJobSynchronizer.Synchronize(environmentName);
+
+			Assert.IsTrue(resultLog.Contains("Set Test (5c7d4c45-2e67-4275-a567-e7b6c98429c2) to IsEnabled=True."));
+			Assert.IsTrue(resultLog.Contains("Ran Test (5c7d4c45-2e67-4275-a567-e7b6c98429c2)."));
+		}
+		[TestMethod]
         public void SynchronizeAllScheduledJobs()
         {
 	        var scheduleJobRepo = new Mock<IScheduledJobRepository>();
-	        var configReader = new Mock<IConfigurationReader>();
+			var scheduleJobExecutor = new Mock<IScheduledJobExecutor>();
+			var configReader = new Mock<IConfigurationReader>();
 
 	        scheduleJobRepo.Setup(x => x.List()).Returns(ListOfScheduledJobs);
 
@@ -60,7 +91,7 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Test
 	        syncData.ScheduledJobs.Add(new ScheduledJobDefinition { Id = "*", IsEnabled = true, Name = string.Empty });
 	        configReader.Setup(x => x.ReadConfiguration()).Returns(syncData);
 
-	        var scheduledJobSynchronizer = new ScheduledJobSynchronizer(scheduleJobRepo.Object, configReader.Object);
+	        var scheduledJobSynchronizer = new ScheduledJobSynchronizer(scheduleJobRepo.Object, scheduleJobExecutor.Object, configReader.Object);
 	        var environmentName = "environmentTest";
 
 	        var resultLog = scheduledJobSynchronizer.Synchronize(environmentName);
@@ -73,7 +104,9 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Test
         public void SynchronizeAllExceptOneScheduledJobs()
         {
 	        var scheduleJobRepo = new Mock<IScheduledJobRepository>();
-	        var configReader = new Mock<IConfigurationReader>();
+			var scheduleJobExecutor = new Mock<IScheduledJobExecutor>();
+
+			var configReader = new Mock<IConfigurationReader>();
 
 	        scheduleJobRepo.Setup(x => x.List()).Returns(ListOfScheduledJobs);
 
@@ -85,7 +118,7 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Test
 	        syncData.ScheduledJobs.Add(new ScheduledJobDefinition { Id = "147f865b-3360-4804-9640-81e5cfe1d56c", IsEnabled = false, Name = string.Empty });
 			configReader.Setup(x => x.ReadConfiguration()).Returns(syncData);
 
-	        var scheduledJobSynchronizer = new ScheduledJobSynchronizer(scheduleJobRepo.Object, configReader.Object);
+	        var scheduledJobSynchronizer = new ScheduledJobSynchronizer(scheduleJobRepo.Object, scheduleJobExecutor.Object, configReader.Object);
 	        var environmentName = "environmentTest";
 
 	        var resultLog = scheduledJobSynchronizer.Synchronize(environmentName);
@@ -98,7 +131,8 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Test
         public void SynchronizeNoneScheduledJobs()
         {
 	        var scheduleJobRepo = new Mock<IScheduledJobRepository>();
-	        var configReader = new Mock<IConfigurationReader>();
+			var scheduleJobExecutor = new Mock<IScheduledJobExecutor>();
+			var configReader = new Mock<IConfigurationReader>();
 
 	        scheduleJobRepo.Setup(x => x.List()).Returns(ListOfScheduledJobs);
 
@@ -109,12 +143,13 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Test
 	        syncData.ScheduledJobs.Add(new ScheduledJobDefinition { Id = "xxx", IsEnabled = true, Name = "Wrong" });
 	        configReader.Setup(x => x.ReadConfiguration()).Returns(syncData);
 
-	        var scheduledJobSynchronizer = new ScheduledJobSynchronizer(scheduleJobRepo.Object, configReader.Object);
+	        var scheduledJobSynchronizer = new ScheduledJobSynchronizer(scheduleJobRepo.Object, scheduleJobExecutor.Object, configReader.Object);
 	        var environmentName = "environmentTest";
 
 	        var resultLog = scheduledJobSynchronizer.Synchronize(environmentName);
 
 	        Assert.IsTrue(resultLog.Contains("Could not find scheduled job with id=\"xxx\" name=\"Wrong\""));
         }
+
 	}
 }

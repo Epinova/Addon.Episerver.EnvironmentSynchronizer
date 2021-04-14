@@ -65,7 +65,8 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 						{
 							Id = element.Id,
 							Name = element.Name,
-							IsEnabled = element.IsEnabled
+							IsEnabled = element.IsEnabled,
+							AutoRun = element.AutoRun
 						};
 						syncData.ScheduledJobs.Add(job);
 					}
