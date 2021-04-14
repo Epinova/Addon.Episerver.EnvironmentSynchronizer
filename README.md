@@ -13,7 +13,7 @@ Example web.config
 ```xml
 <configuration>
   <configSections>
-    <section name="env.synchronizer" type="Addon.Episerver.EnvironmentSynchronizer.Configuration.SynchronizerSection" allowLocation="true" allowDefinition="Everywhere" />
+    <section name="env.synchronizer" type="Addon.Episerver.EnvironmentSynchronizer.Configuration.SynchronizerSection, Addon.Episerver.EnvironmentSynchronizer" allowLocation="true" allowDefinition="Everywhere" />
   </configSections>
 	<env.synchronizer runAsInitializationModule="true" runInitializationModuleEveryStartup="false">
 		<sitedefinitions>
