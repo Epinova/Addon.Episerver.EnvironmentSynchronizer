@@ -134,4 +134,5 @@ Example 2:
   And then it will enable the job "Episerver-notification". -->
 ```
 **IsEnabled** [bool] set if the job should be enabled/disabled. 
+
 **AutoRun** [bool] set if the job should be executed on change of environment. This is an optional attribute which will default to false.  Has no effect when used with the wildcard.

@@ -7,6 +7,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Addon.Episerver.Environment
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Addon.Episerver.EnvironmentSynchronizer.Test", "Addon.Episever.EnvironmentSynchronizer.Test\Addon.Episerver.EnvironmentSynchronizer.Test.csproj", "{3A19B2C4-8EA1-4BA5-937C-F7EE8BB41580}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{886607B0-4954-4DED-962B-0B2BC85CAE15}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
