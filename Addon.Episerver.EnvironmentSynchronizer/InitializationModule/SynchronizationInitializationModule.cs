@@ -46,12 +46,17 @@ namespace Addon.Episerver.EnvironmentSynchronizer.InitializationModule
 
 				if (!runInitialization) { return; }
 
-				var jobId = ((ScheduledPlugInAttribute)typeof(EnvironmentSynchronizationJob).GetCustomAttributes(typeof(ScheduledPlugInAttribute), true)[0]).GUID;
-				var job = scheduledJobRepository.Get(Guid.Parse(jobId));
-
-				if (job != null) { 
-					// on the initial run, the scheduled job may not have been added to the repository.
+				try
+				{
+					var jobId =
+						((ScheduledPlugInAttribute) typeof(EnvironmentSynchronizationJob).GetCustomAttributes(
+							typeof(ScheduledPlugInAttribute), true)[0]).GUID;
+					var job = scheduledJobRepository.Get(Guid.Parse(jobId));
 					ScheduleRunNow(job, scheduledJobRepository);
+				}
+				catch (Exception ex)
+				{
+					Logger.Error("Could not get find or load EnvironmentSynchronizationJob. SynchronizationInitializationModule will not run.", ex);
 				}
 			}
 		}
