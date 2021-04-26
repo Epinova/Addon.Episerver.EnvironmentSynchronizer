@@ -16,27 +16,27 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 
 		public ConfigurationReader(ISynchronizerConfiguration synchronizerConfiguration)
         {
-			this.configuration = synchronizerConfiguration;
+			configuration = synchronizerConfiguration;
         }
 
 		public SynchronizationData ReadConfiguration()
 		{
 			var syncData = new SynchronizationData();
 
-			if(this.configuration.Settings == null)
+			if(configuration.Settings == null)
             {
 				return syncData;
             }
 
 			try
 			{
-				syncData.RunAsInitializationModule = this.configuration.Settings.RunAsInitializationModule;
-				syncData.RunInitializationModuleEveryStartup = this.configuration.Settings.RunInitializationModuleEveryStartup;
+				syncData.RunAsInitializationModule = configuration.Settings.RunAsInitializationModule;
+				syncData.RunInitializationModuleEveryStartup = configuration.Settings.RunInitializationModuleEveryStartup;
 
-				if (this.configuration.Settings.SiteDefinitions != null && this.configuration.Settings.SiteDefinitions.Count > 0)
+				if (configuration.Settings.SiteDefinitions != null && configuration.Settings.SiteDefinitions.Count > 0)
 				{
 					syncData.SiteDefinitions = new List<SiteDefinition>();
-					foreach (SiteDefinitionElement element in this.configuration.Settings.SiteDefinitions)
+					foreach (SiteDefinitionElement element in configuration.Settings.SiteDefinitions)
 					{
 						var siteDefinition = new SiteDefinition()
 						{
@@ -56,10 +56,10 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 					Logger.Information($"Found no site definitions to handle.");
 				}
 
-				if (this.configuration.Settings.ScheduleJobs != null && this.configuration.Settings.ScheduleJobs.Count > 0)
+				if (configuration.Settings.ScheduleJobs != null && configuration.Settings.ScheduleJobs.Count > 0)
 				{
 					syncData.ScheduledJobs = new List<ScheduledJobDefinition>();
-					foreach (ScheduledJobElement element in this.configuration.Settings.ScheduleJobs)
+					foreach (ScheduledJobElement element in configuration.Settings.ScheduleJobs)
 					{
 						var job = new ScheduledJobDefinition
 						{

@@ -111,10 +111,10 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Synchronizers.ScheduledJobs
 
         private void UpdateScheduleJobSettings(List<ScheduledJob> existingScheduledJobs, ScheduledJobDefinition job)
         {
-            var jobDetails = FindScheduledJob(existingScheduledJobs, job);
+            var (scheduledJob, message) = FindScheduledJob(existingScheduledJobs, job);
 
-            ScheduledJob existingJob = jobDetails.scheduledJob;
-            string extraInfoMessage = jobDetails.message;
+            var existingJob = scheduledJob;
+            var extraInfoMessage = message;
 
             if (existingJob != null)
             {
@@ -143,14 +143,14 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Synchronizers.ScheduledJobs
 
         private void AutoRunScheduleJob(List<ScheduledJob> existingScheduledJobs, ScheduledJobDefinition job)
         {
-            var jobDetails = FindScheduledJob(existingScheduledJobs, job);
+            var (scheduledJob, message) = FindScheduledJob(existingScheduledJobs, job);
 
-            ScheduledJob existingJob = jobDetails.scheduledJob;
-            string extraInfoMessage = jobDetails.message;
+            var existingJob = scheduledJob;
+            var extraInfoMessage = message;
 
             if (existingJob != null)
             {
-                this._scheduledJobExecutor.StartAsync(existingJob,
+                _scheduledJobExecutor.StartAsync(existingJob,
                     new JobExecutionOptions
                     {
                         RunSynchronously = true,

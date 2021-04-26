@@ -39,7 +39,7 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration.Tests
         {
             // Arrange
 
-            ExeConfigurationFileMap configFileMap = new ExeConfigurationFileMap()
+            var configFileMap = new ExeConfigurationFileMap()
             {
                 ExeConfigFilename = Path.Combine(TestContext.DeploymentDirectory, "all-settings.config")
             };
@@ -90,7 +90,7 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration.Tests
         {
             // Arrange
 
-            ExeConfigurationFileMap configFileMap = new ExeConfigurationFileMap()
+            var configFileMap = new ExeConfigurationFileMap()
             {
                 ExeConfigFilename = Path.Combine(TestContext.DeploymentDirectory, "no-settings.config")
             };
