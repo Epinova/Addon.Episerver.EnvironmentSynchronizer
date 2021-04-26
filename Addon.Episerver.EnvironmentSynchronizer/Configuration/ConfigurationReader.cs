@@ -12,31 +12,31 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 	{
 		private static readonly ILogger Logger = LogManager.GetLogger();
 
-		private readonly ISynchronizerConfiguration configuration;
+		private readonly ISynchronizerConfiguration _configuration;
 
 		public ConfigurationReader(ISynchronizerConfiguration synchronizerConfiguration)
         {
-			configuration = synchronizerConfiguration;
+			_configuration = synchronizerConfiguration;
         }
 
 		public SynchronizationData ReadConfiguration()
 		{
 			var syncData = new SynchronizationData();
 
-			if(configuration.Settings == null)
+			if(_configuration.Settings == null)
             {
 				return syncData;
             }
 
 			try
 			{
-				syncData.RunAsInitializationModule = configuration.Settings.RunAsInitializationModule;
-				syncData.RunInitializationModuleEveryStartup = configuration.Settings.RunInitializationModuleEveryStartup;
+				syncData.RunAsInitializationModule = _configuration.Settings.RunAsInitializationModule;
+				syncData.RunInitializationModuleEveryStartup = _configuration.Settings.RunInitializationModuleEveryStartup;
 
-				if (configuration.Settings.SiteDefinitions != null && configuration.Settings.SiteDefinitions.Count > 0)
+				if (_configuration.Settings.SiteDefinitions != null && _configuration.Settings.SiteDefinitions.Count > 0)
 				{
 					syncData.SiteDefinitions = new List<SiteDefinition>();
-					foreach (SiteDefinitionElement element in configuration.Settings.SiteDefinitions)
+					foreach (SiteDefinitionElement element in _configuration.Settings.SiteDefinitions)
 					{
 						var siteDefinition = new SiteDefinition()
 						{
@@ -56,10 +56,10 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 					Logger.Information($"Found no site definitions to handle.");
 				}
 
-				if (configuration.Settings.ScheduleJobs != null && configuration.Settings.ScheduleJobs.Count > 0)
+				if (_configuration.Settings.ScheduleJobs != null && _configuration.Settings.ScheduleJobs.Count > 0)
 				{
 					syncData.ScheduledJobs = new List<ScheduledJobDefinition>();
-					foreach (ScheduledJobElement element in configuration.Settings.ScheduleJobs)
+					foreach (ScheduledJobElement element in _configuration.Settings.ScheduleJobs)
 					{
 						var job = new ScheduledJobDefinition
 						{
