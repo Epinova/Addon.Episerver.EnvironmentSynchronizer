@@ -1,0 +1,26 @@
+variables:
+  system.debug: false
+  major: 0
+
+name: $(major).$(rev:r).$(Build.BuildId) #Build.BuildNumber
+
+trigger:
+  batch: true
+  branches:
+    include:
+      - master
+#      - hotfix/*
+
+pool:
+  vmImage: 'windows-latest'
+
+resources:
+  repositories:
+  - repository: pipelines
+    type: git
+    name: Epinova - Modules/Epinova.Pipelines
+    endpoint: Epinova.Pipeline-EnvironmentSynchronizer # Azure DevOps service connection
+    ref: refs/heads/main
+
+steps:
+- template: nuget.sdk.1.yml@pipelines
