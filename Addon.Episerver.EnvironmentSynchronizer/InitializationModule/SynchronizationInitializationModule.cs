@@ -20,8 +20,9 @@ namespace Addon.Episerver.EnvironmentSynchronizer.InitializationModule
 
 		public void Initialize(InitializationEngine context)
 		{
-			var scheduledJobRepository = ServiceLocator.Current.GetInstance<IScheduledJobRepository>();
-			var configReader = new ConfigurationReader();
+			var scheduledJobRepository =  ServiceLocator.Current.GetInstance<IScheduledJobRepository>();
+			var configReader = ServiceLocator.Current.GetInstance<IConfigurationReader>();
+
 			var syncData = configReader.ReadConfiguration();
 			
 

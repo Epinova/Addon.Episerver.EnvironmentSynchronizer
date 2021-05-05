@@ -25,5 +25,12 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 	        get => (bool)this["IsEnabled"];
 	        set => this["IsEnabled"] = value;
         }
+
+        [ConfigurationProperty("AutoRun", IsRequired = false)]
+        public bool AutoRun
+        {
+            get => (bool)this["AutoRun"];
+            set => this["AutoRun"] = value;
+        }
     }
 }
