@@ -41,7 +41,4 @@
 		</group>
     </dependencies>
   </metadata>
-	<files>
-        <file src="Epinova.jpg" target="images\" />
-	</files>
 </package>
