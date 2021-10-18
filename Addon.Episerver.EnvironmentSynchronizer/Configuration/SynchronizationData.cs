@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Addon.Episerver.EnvironmentSynchronizer.Models
 {
-	public class SynchronizationData : ISynchronizationData
+	public class SynchronizationData
 	{
 		public bool RunAsInitializationModule { get; set; }
 		public bool RunInitializationModuleEveryStartup { get; set; }

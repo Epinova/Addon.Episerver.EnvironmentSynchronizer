@@ -1,13 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Addon.Episerver.EnvironmentSynchronizer.Configuration;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Moq;
-using System.Configuration;
-using System.IO;
+using Microsoft.Extensions.Configuration;
 
 namespace Addon.Episerver.EnvironmentSynchronizer.Configuration.Tests
 {
@@ -20,11 +13,7 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration.Tests
         public void ReadConfiguration_Null_Settings_Test()
         {
             // Arrange
-            var moqConfig = new Mock<ISynchronizerConfiguration>();
-
-            moqConfig.SetupGet(p => p.Settings).Returns((SynchronizerSection)null);
-
-            var configReader = new ConfigurationReader(moqConfig.Object);
+            var configReader = new ConfigurationReader(null);
 
             // Act
             var data = configReader.ReadConfiguration();
@@ -34,24 +23,12 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration.Tests
         }
 
         [TestMethod()]
-        [DeploymentItem("test-configs\\all-settings.config")]
+        [DeploymentItem("test-configs\\all-settings.json")]
         public void ReadConfiguration_SiteDefinition_All_Settings_Test()
         {
             // Arrange
-
-            var configFileMap = new ExeConfigurationFileMap()
-            {
-                ExeConfigFilename = Path.Combine(TestContext.DeploymentDirectory, "all-settings.config")
-            };
-
-            var config = ConfigurationManager.OpenMappedExeConfiguration(configFileMap, ConfigurationUserLevel.None);
-            var synchronizerSection = config.GetSection("env.synchronizer") as SynchronizerSection;
-
-            var moqConfig = new Mock<ISynchronizerConfiguration>();
-
-            moqConfig.SetupGet(p => p.Settings).Returns(synchronizerSection);
-
-            var configReader = new ConfigurationReader(moqConfig.Object);
+            var options = GetConfiguration(TestContext.DeploymentDirectory, "all-settings.json");
+            var configReader = new ConfigurationReader(options);
 
             // Act
             var data = configReader.ReadConfiguration();
@@ -79,30 +56,18 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration.Tests
             Assert.AreEqual(false, data.ScheduledJobs[0].AutoRun);
 
             Assert.AreEqual("YourScheduledJob", data.ScheduledJobs[1].Name);
-            Assert.AreEqual("", data.ScheduledJobs[1].Id);
+            Assert.AreEqual(null, data.ScheduledJobs[1].Id);
             Assert.AreEqual(true, data.ScheduledJobs[1].IsEnabled);
             Assert.AreEqual(true, data.ScheduledJobs[1].AutoRun);
         }
 
         [TestMethod()]
-        [DeploymentItem("test-configs\\no-settings.config")]
+        [DeploymentItem("test-configs\\no-settings.json")]
         public void ReadConfiguration_SiteDefinition_No_Settings_Test()
         {
             // Arrange
-
-            var configFileMap = new ExeConfigurationFileMap()
-            {
-                ExeConfigFilename = Path.Combine(TestContext.DeploymentDirectory, "no-settings.config")
-            };
-
-            var config = ConfigurationManager.OpenMappedExeConfiguration(configFileMap, ConfigurationUserLevel.None);
-            var synchronizerSection = config.GetSection("env.synchronizer") as SynchronizerSection;
-
-            var moqConfig = new Mock<ISynchronizerConfiguration>();
-
-            moqConfig.SetupGet(p => p.Settings).Returns(synchronizerSection);
-
-            var configReader = new ConfigurationReader(moqConfig.Object);
+            var options = GetConfiguration(TestContext.DeploymentDirectory, "no-settings.json");
+            var configReader = new ConfigurationReader(options);
 
             // Act
             var data = configReader.ReadConfiguration();
@@ -115,6 +80,20 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration.Tests
 
             Assert.IsNull(data.SiteDefinitions);
             Assert.IsNull(data.ScheduledJobs);
+        }
+
+        public static EnvironmentSynchronizerOptions GetConfiguration(string path, string name)
+        {
+            var configuration = new EnvironmentSynchronizerOptions();
+
+            new ConfigurationBuilder()
+                .SetBasePath(path)
+                .AddJsonFile(name, optional: true)
+                .Build()
+                .GetSection("EnvironmentSynchronizer")
+                .Bind(configuration);
+
+            return configuration;
         }
     }
 }

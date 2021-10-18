@@ -71,6 +71,7 @@ namespace Addon.Episerver.EnvironmentSynchronizer
             return resultLog.ToString();
         }
 
+        // TODO: Verify that this still works
         public string GetEnvironmentName()
         {
 	        ServiceLocator.Current.TryGetExistingInstance<IEnvironmentNameSource>(out var environmentNameSource);
