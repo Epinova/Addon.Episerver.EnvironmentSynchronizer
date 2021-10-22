@@ -4,6 +4,8 @@ using EPiServer.Web;
 using System;
 using System.Collections.Generic;
 using EPiServer.ServiceLocation;
+using System.Linq;
+using System.Globalization;
 
 namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 {
@@ -12,9 +14,9 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 	{
 		private static readonly ILogger Logger = LogManager.GetLogger();
 
-		private readonly ISynchronizerConfiguration _configuration;
+		private readonly EnvironmentSynchronizerOptions _configuration;
 
-		public ConfigurationReader(ISynchronizerConfiguration synchronizerConfiguration)
+		public ConfigurationReader(EnvironmentSynchronizerOptions synchronizerConfiguration)
         {
 			_configuration = synchronizerConfiguration;
         }
@@ -23,27 +25,27 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 		{
 			var syncData = new SynchronizationData();
 
-			if(_configuration.Settings == null)
+			if(_configuration == null)
             {
 				return syncData;
             }
 
 			try
 			{
-				syncData.RunAsInitializationModule = _configuration.Settings.RunAsInitializationModule;
-				syncData.RunInitializationModuleEveryStartup = _configuration.Settings.RunInitializationModuleEveryStartup;
+				syncData.RunAsInitializationModule = _configuration.RunAsInitializationModule;
+				syncData.RunInitializationModuleEveryStartup = _configuration.RunInitializationModuleEveryStartup;
 
-				if (_configuration.Settings.SiteDefinitions != null && _configuration.Settings.SiteDefinitions.Count > 0)
+				if (_configuration.SiteDefinitions != null && _configuration.SiteDefinitions.Count > 0)
 				{
 					syncData.SiteDefinitions = new List<SiteDefinition>();
-					foreach (SiteDefinitionElement element in _configuration.Settings.SiteDefinitions)
+					foreach (var options in _configuration.SiteDefinitions)
 					{
 						var siteDefinition = new SiteDefinition()
 						{
-							Id = string.IsNullOrEmpty(element.Id) ? Guid.Empty : new Guid(element.Id),
-							Name = string.IsNullOrEmpty(element.Name) ? string.Empty : element.Name,
-							SiteUrl = string.IsNullOrEmpty(element.SiteUrl) ? null : new Uri(element.SiteUrl),
-							Hosts = element.Hosts.ToHostDefinitions()
+							Id = string.IsNullOrEmpty(options.Id) ? Guid.Empty : new Guid(options.Id),
+							Name = string.IsNullOrEmpty(options.Name) ? string.Empty : options.Name,
+							SiteUrl = string.IsNullOrEmpty(options.SiteUrl) ? null : new Uri(options.SiteUrl),
+							Hosts = ToHostDefinitions(options.Hosts)
 						};
 						if (!string.IsNullOrEmpty(siteDefinition.Name) && siteDefinition.SiteUrl != null)
 						{
@@ -56,17 +58,17 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 					Logger.Information($"Found no site definitions to handle.");
 				}
 
-				if (_configuration.Settings.ScheduleJobs != null && _configuration.Settings.ScheduleJobs.Count > 0)
+				if (_configuration.ScheduledJobs != null && _configuration.ScheduledJobs.Count > 0)
 				{
 					syncData.ScheduledJobs = new List<ScheduledJobDefinition>();
-					foreach (ScheduledJobElement element in _configuration.Settings.ScheduleJobs)
+					foreach (var options in _configuration.ScheduledJobs)
 					{
 						var job = new ScheduledJobDefinition
 						{
-							Id = element.Id,
-							Name = element.Name,
-							IsEnabled = element.IsEnabled,
-							AutoRun = element.AutoRun
+							Id = options.Id,
+							Name = options.Name,
+							IsEnabled = options.IsEnabled,
+							AutoRun = options.AutoRun
 						};
 						syncData.ScheduledJobs.Add(job);
 					}
@@ -82,6 +84,19 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 			}
 
 			return syncData;
+		}
+
+		private List<HostDefinition> ToHostDefinitions(IList<HostOptions> hosts)
+		{
+			return hosts.Select(hostOptions => {
+				return new HostDefinition
+				{
+					Name = hostOptions.Name,
+					Type = hostOptions.Type != HostDefinitionType.Undefined ? hostOptions.Type : HostDefinitionType.Undefined,
+					UseSecureConnection = hostOptions.UseSecureConnection,
+					Language = string.IsNullOrEmpty(hostOptions.Language) ? null : new CultureInfo(hostOptions.Language)
+				};
+			}).ToList();
 		}
 	}
 }
