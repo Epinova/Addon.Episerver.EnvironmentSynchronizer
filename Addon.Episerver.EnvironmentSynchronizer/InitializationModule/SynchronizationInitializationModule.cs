@@ -8,39 +8,22 @@ using EPiServer.Framework.Initialization;
 using EPiServer.Logging;
 using EPiServer.PlugIn;
 using EPiServer.ServiceLocation;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Addon.Episerver.EnvironmentSynchronizer.InitializationModule
 {
 
 	[InitializableModule]
 	[ModuleDependency(typeof(EPiServer.Web.InitializationModule))]
-	public class SynchronizationInitializationModule : IConfigurableModule
+	public class SynchronizationInitializationModule : IInitializableModule
 	{
 		private static readonly ILogger Logger = LogManager.GetLogger();
 
-        public IConfiguration Configuration { get; }
-
-        public SynchronizationInitializationModule(IConfiguration configuration)
+        public void Initialize(InitializationEngine context)
         {
-			Configuration = configuration;
-        }
-
-		public void ConfigureContainer(ServiceConfigurationContext context)
-		{
-			context.Services.AddOptions<EnvironmentSynchronizerOptions>()
-				.Bind(Configuration.GetSection("EnvironmentSynchronizerOptions"))
-				.ValidateDataAnnotations();
-		}
-
-		public void Initialize(InitializationEngine context)
-		{
-			var scheduledJobRepository =  ServiceLocator.Current.GetInstance<IScheduledJobRepository>();
+            var scheduledJobRepository =  ServiceLocator.Current.GetInstance<IScheduledJobRepository>();
 			var configReader = ServiceLocator.Current.GetInstance<IConfigurationReader>();
 
 			var syncData = configReader.ReadConfiguration();
-			
 
 			if (syncData.RunAsInitializationModule)
 			{
