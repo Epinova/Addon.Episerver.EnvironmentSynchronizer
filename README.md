@@ -9,6 +9,41 @@ The synchronizer can be run as a InitializationModule or as a ScheduledJob. It d
 This will be packaged as a Nuget package named Addon.Episerver.EnvironmentSynchronizer and put in Episervers Nuget feed once tested a bit more.  
 
 ## Configuration
+Example .json  
+```json
+"EnvironmentSynchronizerOptions": {
+    "RunAsInitializationModule": true,
+    "RunInitializationModuleEveryStartup": false,
+    "SiteDefinitions": [
+      {
+        "name": "CustomerX",
+        "SiteUrl": "https://custxmstr972znb5prep.azurewebsites.net/",
+        "Hosts": [
+          {
+            "Name": "*",
+            "UseSecureConnection": false
+          },
+          {
+            "Name": "custxmstr972znb5prep-slot.azurewebsites.net",
+            "UseSecureConnection": true,
+            "Language": "en"
+          }
+        ]
+      }
+    ],
+    "ScheduledJobs": [
+      {
+        "name": "*",
+        "IsEnabled": false
+      },
+      {
+        "name": "YourScheduledJob",
+        "IsEnabled": true,
+        "AutoRun": true
+      }
+    ]
+  }
+```
 Example web.config
 ```xml
 <configuration>
