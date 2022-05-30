@@ -9,7 +9,7 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Jobs
 {
 	[ScheduledPlugIn(
 		DisplayName = "Environment Synchronization", 
-		Description = "Ensures that content and settings that are stored in the databases are corrected given the current environment. This is helpful after a content synchronization between different Episerver environments. https://github.com/ovelartelius/episerver-env-sync", 
+		Description = "Ensures that content and settings that are stored in the databases are corrected given the current environment. This is helpful after a content synchronization between different Optimizely CMS environments. https://github.com/Epinova/Addon.Episerver.EnvironmentSynchronizer", 
 		SortIndex = 100,
 		GUID = "1eda8c91-a367-41df-adee-e6143b1e37c3")
 	]
