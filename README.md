@@ -86,25 +86,31 @@ namespace Yoursite.Infrastructure.Environments
 ```
 
 ## About environments
-Episerver has many different ways to be hosted. We have added the infrastructure to tell your synchronizers the current environment - but you need to implement the logic for this yourself. For instance:
-
-```csharp  
+Episerver has many different ways to be hosted. We have added the infrastructure to tell your synchronizers the current environment - but you need to implement the logic for this yourself. For instance:  
+```csharp
 using Addon.Episerver.EnvironmentSynchronizer;
 using EPiServer.ServiceLocation;
-using System.Configuration;
+using Microsoft.Extensions.Configuration;
 
 namespace Yoursite.Infrastructure.Environments
 {
-    [ServiceConfiguration(typeof(IEnvironmentNameSource))]
-    public class SiteEnvironmentNameSource : IEnvironmentNameSource
+   [ServiceConfiguration(typeof(IEnvironmentNameSource))]
+    public class EnvironmentNameSource : IEnvironmentNameSource
     {
+        private readonly IConfiguration Configuration;
+
+        public EnvironmentNameSource(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
         public string GetCurrentEnvironmentName()
         {
-            return ConfigurationManager.AppSettings["EnvironmentName"];
+            return Configuration["EnvironmentSettings.Environment"];
         }
     }
 }
-``` 
+```  
 ### DXP variable episerver:EnvironmentName support
 If you don´t implement the logic specified above. The DXP variable ´episerver:EnvironmentName´ will be used. More information about the DXP environments and the appsetting can be found on [https://world.episerver.com/documentation/developer-guides/digital-experience-platform/development-considerations/environment-configurations/](https://world.episerver.com/documentation/developer-guides/digital-experience-platform/development-considerations/environment-configurations/)  
 So if you don´t set this variable yourself you will get the following values:  
