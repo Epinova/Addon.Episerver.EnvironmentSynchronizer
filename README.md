@@ -44,26 +44,31 @@ Example .json
     ]
   }
 ```
-Example web.config
-```xml
-<configuration>
-  <configSections>
-    <section name="env.synchronizer" type="Addon.Episerver.EnvironmentSynchronizer.Configuration.SynchronizerSection, Addon.Episerver.EnvironmentSynchronizer" allowLocation="true" allowDefinition="Everywhere" />
-  </configSections>
-	<env.synchronizer runAsInitializationModule="true" runInitializationModuleEveryStartup="false">
-		<sitedefinitions>
-			<sitedefinition Id="" Name="CustomerX" SiteUrl="https://custxmstr972znb5prep.azurewebsites.net/">
-				<hosts>
-					<host Name="*" UseSecureConnection="false" Language="" />
-					<host Name="custxmstr972znb5prep-slot.azurewebsites.net" UseSecureConnection="true" Language="en" />
-				</hosts>
-			</sitedefinition>
-		</sitedefinitions>
-		<scheduledjobs>
-			<scheduledjob Id="*" Name="*" IsEnabled="false" />
-			<scheduledjob Name="YourScheduledJob" IsEnabled="true" AutoRun="true"/>
-		</scheduledjobs>
-	</env.synchronizer>
+Startup.cs
+```csharp
+using Addon.Episerver.EnvironmentSyncgronizer.Configuration;
+...
+namespave [Yournamespace]
+{
+	public class Startup
+	{
+		private readonly IConfiguration _configuration;
+		...
+		public Startup(IConfiguration configuration ...)
+		{
+			...
+			_configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+			...
+		}
+		public void ConfigurationServices(IServiceCollection services)
+		{
+			...
+			services.AddEnvironmentSynchronization(_configuration)
+			...
+		}
+	...
+	}
+}
 ```
 
 ## Adding custom handlers
