@@ -78,7 +78,7 @@ namespace Addon.Episerver.EnvironmentSynchronizer
 
 	        if (string.IsNullOrEmpty(environmentName))
 	        {
-                environmentName = ConfigurationManager.AppSettings["episerver:EnvironmentName"];
+                environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
             }
 
 	        return environmentName;
