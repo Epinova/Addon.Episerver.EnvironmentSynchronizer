@@ -65,7 +65,7 @@ namespace Yoursite.Infrastructure.Environments
     {
         public string GetCurrentEnvironmentName()
         {
-            return ConfigurationManager.AppSettings["EnvironmentName"];
+            return Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
         }
     }
 }
