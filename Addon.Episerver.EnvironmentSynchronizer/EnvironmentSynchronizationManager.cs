@@ -18,7 +18,6 @@ namespace Addon.Episerver.EnvironmentSynchronizer
 		string GetEnvironmentName();
 	}
 
-	[ServiceConfiguration(ServiceType = typeof(IEnvironmentSynchronizationManager))]
     public class EnvironmentSynchronizationManager : IEnvironmentSynchronizationManager
     {
         private static readonly ILogger Logger = LogManager.GetLogger();
