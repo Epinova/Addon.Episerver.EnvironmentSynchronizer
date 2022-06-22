@@ -48,7 +48,7 @@ Startup.cs
 ```csharp
 using Addon.Episerver.EnvironmentSyncgronizer.Configuration;
 ...
-namespave [Yournamespace]
+namespace [Yournamespace]
 {
 	public class Startup
 	{
@@ -60,7 +60,7 @@ namespave [Yournamespace]
 			_configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 			...
 		}
-		public void ConfigurationServices(IServiceCollection services)
+		public void ConfigureServices(IServiceCollection services)
 		{
 			...
 			services.AddEnvironmentSynchronization(_configuration)
