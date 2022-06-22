@@ -3,13 +3,11 @@ using EPiServer.Logging;
 using EPiServer.Web;
 using System;
 using System.Collections.Generic;
-using EPiServer.ServiceLocation;
 using System.Linq;
 using System.Globalization;
 
 namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 {
-	[ServiceConfiguration(typeof(IConfigurationReader))]
 	public class ConfigurationReader : IConfigurationReader
 	{
 		private static readonly ILogger Logger = LogManager.GetLogger();
