@@ -111,7 +111,7 @@ namespace Yoursite.Infrastructure.Environments
 
         public string GetCurrentEnvironmentName()
         {
-            return Configuration["EnvironmentSettings.Environment"];
+            return Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
         }
     }
 }
