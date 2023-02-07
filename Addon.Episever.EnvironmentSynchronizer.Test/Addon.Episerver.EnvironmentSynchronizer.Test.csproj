@@ -25,12 +25,7 @@
     <ProjectReference Include="..\Addon.Episerver.EnvironmentSynchronizer\Addon.Episerver.EnvironmentSynchronizer.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.*" />
     <PackageReference Include="Moq" Version="4.16.1" />
-    <PackageReference Include="MSTest.TestFramework" Version="2.2.7" />
-    <PackageReference Include="MSTest.TestAdapter" Version="2.2.7">
-      <TreatAsUsed>true</TreatAsUsed>
-    </PackageReference>
     <PackageReference Include="xunit" Version="2.4.2" />
     <PackageReference Include="xunit.core" Version="2.4.2" />
     <PackageReference Include="xunit.runner.utility" Version="2.4.2" />
