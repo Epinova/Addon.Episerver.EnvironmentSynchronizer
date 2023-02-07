@@ -1,7 +1,7 @@
 variables:
   system.debug: false
   major: 0
-  minor: 1
+  minor: 4
 
 name: $(major).$(minor).$(rev:r) #Build.BuildNumber
 
