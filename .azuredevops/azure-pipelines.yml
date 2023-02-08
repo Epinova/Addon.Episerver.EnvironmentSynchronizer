@@ -28,7 +28,7 @@ steps:
     script: |
       # Write your PowerShell commands here.
       
-      Remove-Item -Path $(System.DefaultWorkingDirectory)\dlls -Force
+      Remove-Item -Path $(System.DefaultWorkingDirectory)\dlls -Force -Recurse
 
 - template: nuget.3.yml@pipelines
   parameters:
