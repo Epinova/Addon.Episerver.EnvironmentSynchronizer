@@ -22,6 +22,14 @@ resources:
     ref: refs/heads/main
 
 steps:
+- task: PowerShell@2
+  inputs:
+    targetType: 'inline'
+    script: |
+      # Write your PowerShell commands here.
+      
+      Remove-Item -Path $(System.DefaultWorkingDirectory)\dlls -Force
+
 - template: nuget.3.yml@pipelines
   parameters:
     dotnetVersions:
