@@ -1,7 +1,7 @@
 variables:
   system.debug: false
   major: 0
-  minor: 4
+  minor: 6
 
 name: $(major).$(minor).$(rev:r) #Build.BuildNumber
 
@@ -34,4 +34,5 @@ steps:
   parameters:
     dotnetVersions:
       - 6.0.x
+      - 7.0.x
     workingDirectory: "$(System.DefaultWorkingDirectory)"
