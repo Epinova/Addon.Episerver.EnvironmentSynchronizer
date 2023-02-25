@@ -11,7 +11,7 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
             services.AddSingleton<IConfigurationReader, ConfigurationReader>();
             services.AddSingleton<EnvironmentSynchronizationManager>();
             services.AddSingleton<EnvironmentSynchronizationStore>();
-            services.AddSingleton(configuration.GetSection("EnvironmentSynchronizerOptions").Get<EnvironmentSynchronizerOptions>());
+            services.AddSingleton(configuration.GetSection(EnvironmentSynchronizerOptions.EnvironmentSynchronizer).Get<EnvironmentSynchronizerOptions>());
 
             return services;
         }

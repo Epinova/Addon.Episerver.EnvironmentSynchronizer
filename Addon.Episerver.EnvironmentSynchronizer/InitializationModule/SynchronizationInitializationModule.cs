@@ -1,13 +1,6 @@
-﻿using System;
-using Addon.Episerver.EnvironmentSynchronizer.Configuration;
-using Addon.Episerver.EnvironmentSynchronizer.DynamicData;
-using Addon.Episerver.EnvironmentSynchronizer.Jobs;
-using EPiServer.DataAbstraction;
-using EPiServer.Framework;
+﻿using EPiServer.Framework;
 using EPiServer.Framework.Initialization;
 using EPiServer.Logging;
-using EPiServer.PlugIn;
-using EPiServer.Scheduler;
 using EPiServer.ServiceLocation;
 
 namespace Addon.Episerver.EnvironmentSynchronizer.InitializationModule
@@ -19,52 +12,57 @@ namespace Addon.Episerver.EnvironmentSynchronizer.InitializationModule
 	{
 		private static readonly ILogger Logger = LogManager.GetLogger();
 
-        public void Initialize(InitializationEngine context)
-        {
-            var scheduledJobRepository =  ServiceLocator.Current.GetInstance<IScheduledJobRepository>();
-			var configReader = ServiceLocator.Current.GetInstance<IConfigurationReader>();
-            var scheduledJobExecutor = ServiceLocator.Current.GetInstance<IScheduledJobExecutor>();
+		public void Initialize(InitializationEngine context)
+		{
+			var _executer = ServiceLocator.Current.GetInstance<IInitializationExecuter>();
 
-			var syncData = configReader.ReadConfiguration();
+			Logger.Information($"InitializableModule:SynchronizationInitializationModule Initialize");
+			_executer.Initialize();
 
-			if (syncData.RunAsInitializationModule)
-			{
-				Logger.Information($"Environment Synchronizer found RunAsInitializationModule=true");
-				var runInitialization = true;
-				var environmentSynchronizationManager = ServiceLocator.Current.GetInstance<EnvironmentSynchronizationManager>();
+			//var scheduledJobRepository = ServiceLocator.Current.GetInstance<IScheduledJobRepository>();
+			//var configReader = ServiceLocator.Current.GetInstance<IConfigurationReader>();
+			//var scheduledJobExecutor = ServiceLocator.Current.GetInstance<IScheduledJobExecutor>();
 
-				if (!syncData.RunInitializationModuleEveryStartup)
-				{
-					Logger.Information($"Environment Synchronizer found RunInitializationModuleEveryStartup=false");
-					var store = ServiceLocator.Current.GetInstance<EnvironmentSynchronizationStore>();
-					var stamp = store.GetStamp();
-					if (stamp != null && stamp.Environment == environmentSynchronizationManager.GetEnvironmentName())
-					{
-						runInitialization = false;
-						Logger.Information($"Environment Synchronizer will not run. Stamp match the current environment {stamp.Environment}");
-					}
-				}
+			//var syncData = configReader.ReadConfiguration();
 
-				if (!runInitialization) { return; }
+			//if (syncData.RunAsInitializationModule)
+			//{
+			//	Logger.Information($"Environment Synchronizer found RunAsInitializationModule=true");
+			//	var runInitialization = true;
+			//	var environmentSynchronizationManager = ServiceLocator.Current.GetInstance<EnvironmentSynchronizationManager>();
 
-				try
-				{
-					var jobId =
-						((ScheduledPlugInAttribute) typeof(EnvironmentSynchronizationJob).GetCustomAttributes(
-							typeof(ScheduledPlugInAttribute), true)[0]).GUID;
-					var job = scheduledJobRepository.Get(Guid.Parse(jobId));
-                    scheduledJobExecutor.StartAsync(job,
-                        new JobExecutionOptions
-                        {
-                            RunSynchronously = true,
-                            Trigger = ScheduledJobTrigger.User
-                        });
-				}
-				catch (Exception ex)
-				{
-					Logger.Error("Could not get find or load EnvironmentSynchronizationJob. SynchronizationInitializationModule will not run.", ex);
-				}
-			}
+			//	if (!syncData.RunInitializationModuleEveryStartup)
+			//	{
+			//		Logger.Information($"Environment Synchronizer found RunInitializationModuleEveryStartup=false");
+			//		var store = ServiceLocator.Current.GetInstance<EnvironmentSynchronizationStore>();
+			//		var stamp = store.GetStamp();
+			//		if (stamp != null && stamp.Environment == environmentSynchronizationManager.GetEnvironmentName())
+			//		{
+			//			runInitialization = false;
+			//			Logger.Information($"Environment Synchronizer will not run. Stamp match the current environment {stamp.Environment}");
+			//		}
+			//	}
+
+			//	if (!runInitialization) { return; }
+
+			//	try
+			//	{
+			//		var jobId =
+			//			((ScheduledPlugInAttribute)typeof(EnvironmentSynchronizationJob).GetCustomAttributes(
+			//				typeof(ScheduledPlugInAttribute), true)[0]).GUID;
+			//		var job = scheduledJobRepository.Get(Guid.Parse(jobId));
+			//		scheduledJobExecutor.StartAsync(job,
+			//			new JobExecutionOptions
+			//			{
+			//				RunSynchronously = true,
+			//				Trigger = ScheduledJobTrigger.User
+			//			});
+			//	}
+			//	catch (Exception ex)
+			//	{
+			//		Logger.Error("Could not get find or load EnvironmentSynchronizationJob. SynchronizationInitializationModule will not run.", ex);
+			//	}
+			//}
 		}
 
 		public void Preload(string[] parameters) { }
@@ -72,5 +70,5 @@ namespace Addon.Episerver.EnvironmentSynchronizer.InitializationModule
 		public void Uninitialize(InitializationEngine context) { }
 
 
-    }
+	}
 }

@@ -78,7 +78,7 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 			}
 			catch (Exception ex)
 			{
-				Logger.Error($"No configuration found in the web.config. Missing env.synchronizer section.", ex);
+				Logger.Error($"No configuration found in the appSettings.json. Missing EnvironmentSynchronizer section.", ex);
 			}
 
 			return syncData;
