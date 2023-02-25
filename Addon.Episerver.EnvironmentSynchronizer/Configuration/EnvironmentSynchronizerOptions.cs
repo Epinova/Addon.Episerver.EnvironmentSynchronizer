@@ -7,6 +7,8 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 {
     public class EnvironmentSynchronizerOptions
     {
+        public const string EnvironmentSynchronizer = "EnvironmentSynchronizer";
+
         public bool RunAsInitializationModule { get; set; }
 
         public bool RunInitializationModuleEveryStartup {  get; set;}
