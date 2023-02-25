@@ -14,6 +14,10 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 
 		private readonly EnvironmentSynchronizerOptions _configuration;
 
+		public ConfigurationReader()
+		{
+		}
+
 		public ConfigurationReader(EnvironmentSynchronizerOptions synchronizerConfiguration)
         {
 			_configuration = synchronizerConfiguration;
