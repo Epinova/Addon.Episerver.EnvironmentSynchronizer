@@ -9,26 +9,66 @@ The synchronizer can be run as a InitializationModule or as a ScheduledJob. It d
 This will be packaged as a Nuget package named Addon.Episerver.EnvironmentSynchronizer and put in Episervers Nuget feed once tested a bit more.  
 
 ## Configuration
-Example web.config
-```xml
-<configuration>
-  <configSections>
-    <section name="env.synchronizer" type="Addon.Episerver.EnvironmentSynchronizer.Configuration.SynchronizerSection, Addon.Episerver.EnvironmentSynchronizer" allowLocation="true" allowDefinition="Everywhere" />
-  </configSections>
-	<env.synchronizer runAsInitializationModule="true" runInitializationModuleEveryStartup="false">
-		<sitedefinitions>
-			<sitedefinition Id="" Name="CustomerX" SiteUrl="https://custxmstr972znb5prep.azurewebsites.net/">
-				<hosts>
-					<host Name="*" UseSecureConnection="false" Language="" />
-					<host Name="custxmstr972znb5prep-slot.azurewebsites.net" UseSecureConnection="true" Language="en" />
-				</hosts>
-			</sitedefinition>
-		</sitedefinitions>
-		<scheduledjobs>
-			<scheduledjob Id="*" Name="*" IsEnabled="false" />
-			<scheduledjob Name="YourScheduledJob" IsEnabled="true" AutoRun="true"/>
-		</scheduledjobs>
-	</env.synchronizer>
+Example .json  
+```json
+"EnvironmentSynchronizerOptions": {
+    "RunAsInitializationModule": true,
+    "RunInitializationModuleEveryStartup": false,
+    "SiteDefinitions": [
+      {
+        "name": "CustomerX",
+        "SiteUrl": "https://custxmstr972znb5prep.azurewebsites.net/",
+        "Hosts": [
+          {
+            "Name": "*",
+            "UseSecureConnection": false
+          },
+          {
+            "Name": "custxmstr972znb5prep-slot.azurewebsites.net",
+            "UseSecureConnection": true,
+            "Language": "en"
+          }
+        ]
+      }
+    ],
+    "ScheduledJobs": [
+      {
+        "name": "*",
+        "IsEnabled": false
+      },
+      {
+        "name": "YourScheduledJob",
+        "IsEnabled": true,
+        "AutoRun": true
+      }
+    ]
+  }
+```
+Startup.cs
+```csharp
+using Addon.Episerver.EnvironmentSyncgronizer.Configuration;
+...
+namespace [Yournamespace]
+{
+	public class Startup
+	{
+		private readonly IConfiguration _configuration;
+		...
+		public Startup(IConfiguration configuration ...)
+		{
+			...
+			_configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+			...
+		}
+		public void ConfigureServices(IServiceCollection services)
+		{
+			...
+			services.AddEnvironmentSynchronization(_configuration)
+			...
+		}
+	...
+	}
+}
 ```
 
 ## Adding custom handlers
@@ -51,25 +91,37 @@ namespace Yoursite.Infrastructure.Environments
 ```
 
 ## About environments
-Episerver has many different ways to be hosted. We have added the infrastructure to tell your synchronizers the current environment - but you need to implement the logic for this yourself. For instance:
-
-```csharp  
+Episerver has many different ways to be hosted. We have added the infrastructure to tell your synchronizers the current environment - but you need to implement the logic for this yourself. For instance:  
+```csharp
 using Addon.Episerver.EnvironmentSynchronizer;
 using EPiServer.ServiceLocation;
-using System.Configuration;
+using Microsoft.Extensions.Configuration;
 
 namespace Yoursite.Infrastructure.Environments
 {
-    [ServiceConfiguration(typeof(IEnvironmentNameSource))]
-    public class SiteEnvironmentNameSource : IEnvironmentNameSource
+   [ServiceConfiguration(typeof(IEnvironmentNameSource))]
+    public class EnvironmentNameSource : IEnvironmentNameSource
     {
+        private readonly IConfiguration Configuration;
+
+        public EnvironmentNameSource(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
         public string GetCurrentEnvironmentName()
         {
             return Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
         }
     }
 }
-``` 
+```
+In the example above it loads the setting/configuration value from appsettings.json with the name "EnvironmentSettings.Environment".  
+```json
+{
+  "EnvironmentSettings.Environment": "dev",
+}
+```
 ### DXP variable episerver:EnvironmentName support
 If you don´t implement the logic specified above. The DXP variable ´episerver:EnvironmentName´ will be used. More information about the DXP environments and the appsetting can be found on [https://world.episerver.com/documentation/developer-guides/digital-experience-platform/development-considerations/environment-configurations/](https://world.episerver.com/documentation/developer-guides/digital-experience-platform/development-considerations/environment-configurations/)  
 So if you don´t set this variable yourself you will get the following values:  

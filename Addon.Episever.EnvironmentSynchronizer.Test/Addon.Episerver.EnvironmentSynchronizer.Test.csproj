@@ -10,22 +10,28 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <None Update="test-configs\no-settings.json">
+    <None Remove="test-configs\all-settings.json" />
+    <None Remove="test-configs\no-settings.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="test-configs\all-settings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="test-configs\all-settings.json">
+    </EmbeddedResource>
+    <EmbeddedResource Include="test-configs\no-settings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Addon.Episerver.EnvironmentSynchronizer\Addon.Episerver.EnvironmentSynchronizer.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.*" />
     <PackageReference Include="Moq" Version="4.16.1" />
-    <PackageReference Include="MSTest.TestFramework" Version="2.2.7" />
-    <PackageReference Include="MSTest.TestAdapter" Version="2.2.7">
-      <TreatAsUsed>true</TreatAsUsed>
+    <PackageReference Include="xunit" Version="2.4.2" />
+    <PackageReference Include="xunit.core" Version="2.4.2" />
+    <PackageReference Include="xunit.runner.utility" Version="2.4.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
 </Project>

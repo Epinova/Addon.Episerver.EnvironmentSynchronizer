@@ -7,40 +7,25 @@ using EPiServer.Framework;
 using EPiServer.Framework.Initialization;
 using EPiServer.Logging;
 using EPiServer.PlugIn;
+using EPiServer.Scheduler;
 using EPiServer.ServiceLocation;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Addon.Episerver.EnvironmentSynchronizer.InitializationModule
 {
 
 	[InitializableModule]
 	[ModuleDependency(typeof(EPiServer.Web.InitializationModule))]
-	public class SynchronizationInitializationModule : IConfigurableModule
+	public class SynchronizationInitializationModule : IInitializableModule
 	{
 		private static readonly ILogger Logger = LogManager.GetLogger();
 
-        public IConfiguration Configuration { get; }
-
-        public SynchronizationInitializationModule(IConfiguration configuration)
+        public void Initialize(InitializationEngine context)
         {
-			Configuration = configuration;
-        }
-
-		public void ConfigureContainer(ServiceConfigurationContext context)
-		{
-			context.Services.AddOptions<EnvironmentSynchronizerOptions>()
-				.Bind(Configuration.GetSection("EnvironmentSynchronizerOptions"))
-				.ValidateDataAnnotations();
-		}
-
-		public void Initialize(InitializationEngine context)
-		{
-			var scheduledJobRepository =  ServiceLocator.Current.GetInstance<IScheduledJobRepository>();
+            var scheduledJobRepository =  ServiceLocator.Current.GetInstance<IScheduledJobRepository>();
 			var configReader = ServiceLocator.Current.GetInstance<IConfigurationReader>();
+            var scheduledJobExecutor = ServiceLocator.Current.GetInstance<IScheduledJobExecutor>();
 
 			var syncData = configReader.ReadConfiguration();
-			
 
 			if (syncData.RunAsInitializationModule)
 			{
@@ -68,22 +53,18 @@ namespace Addon.Episerver.EnvironmentSynchronizer.InitializationModule
 						((ScheduledPlugInAttribute) typeof(EnvironmentSynchronizationJob).GetCustomAttributes(
 							typeof(ScheduledPlugInAttribute), true)[0]).GUID;
 					var job = scheduledJobRepository.Get(Guid.Parse(jobId));
-					ScheduleRunNow(job, scheduledJobRepository);
+                    scheduledJobExecutor.StartAsync(job,
+                        new JobExecutionOptions
+                        {
+                            RunSynchronously = true,
+                            Trigger = ScheduledJobTrigger.User
+                        });
 				}
 				catch (Exception ex)
 				{
 					Logger.Error("Could not get find or load EnvironmentSynchronizationJob. SynchronizationInitializationModule will not run.", ex);
 				}
 			}
-		}
-
-		private static void ScheduleRunNow(ScheduledJob job, IScheduledJobRepository scheduledJobRepository)
-		{
-			job.IntervalType = ScheduledIntervalType.None;
-			job.IntervalLength = 0;
-			job.IsEnabled = true;
-			job.NextExecution = DateTime.Now.AddSeconds(10);
-			scheduledJobRepository.Save(job);
 		}
 
 		public void Preload(string[] parameters) { }

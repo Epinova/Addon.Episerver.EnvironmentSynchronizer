@@ -18,7 +18,6 @@ namespace Addon.Episerver.EnvironmentSynchronizer
 		string GetEnvironmentName();
 	}
 
-	[ServiceConfiguration(ServiceType = typeof(IEnvironmentSynchronizationManager))]
     public class EnvironmentSynchronizationManager : IEnvironmentSynchronizationManager
     {
         private static readonly ILogger Logger = LogManager.GetLogger();
@@ -79,7 +78,7 @@ namespace Addon.Episerver.EnvironmentSynchronizer
 
 	        if (string.IsNullOrEmpty(environmentName))
 	        {
-                environmentName = ConfigurationManager.AppSettings["episerver:EnvironmentName"];
+                environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
             }
 
 	        return environmentName;
