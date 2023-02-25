@@ -46,7 +46,7 @@ Example .json
 ```
 Startup.cs
 ```csharp
-using Addon.Episerver.EnvironmentSyncgronizer.Configuration;
+using Addon.Episerver.EnvironmentSynchronizer.Configuration;
 ...
 namespace [Yournamespace]
 {
@@ -62,8 +62,10 @@ namespace [Yournamespace]
 		}
 		public void ConfigureServices(IServiceCollection services)
 		{
+            ...
+            services.AddCms()... // Add somewhere after AddCms()...
 			...
-			services.AddEnvironmentSynchronization(_configuration)
+			services.AddEnvironmentSynchronization(_configuration);
 			...
 		}
 	...
