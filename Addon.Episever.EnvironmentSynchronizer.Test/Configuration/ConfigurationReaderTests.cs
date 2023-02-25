@@ -2,6 +2,7 @@
 using System;
 using Microsoft.Extensions.Configuration;
 using FluentAssertions;
+using System.IO;
 
 namespace Addon.Episerver.EnvironmentSynchronizer.Configuration.Tests
 {
@@ -82,11 +83,12 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration.Tests
 
 		public static EnvironmentSynchronizerOptions GetConfiguration(string name)
 		{
-			var path = Environment.CurrentDirectory + "\\test-configs";
+			string[] paths = { Environment.CurrentDirectory, "test-configs" };
+			string fullPath = Path.Combine(paths);
 			var configuration = new EnvironmentSynchronizerOptions();
 
 			new ConfigurationBuilder()
-				.SetBasePath(path)
+				.SetBasePath(fullPath)
 				.AddJsonFile(name, optional: true)
 				.Build()
 				.GetSection(EnvironmentSynchronizerOptions.EnvironmentSynchronizer)
