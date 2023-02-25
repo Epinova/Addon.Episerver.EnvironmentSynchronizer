@@ -12,10 +12,34 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 
         public static IServiceCollection AddEnvironmentSynchronization(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddSingleton<IConfigurationReader, ConfigurationReader>();
-            services.AddSingleton<EnvironmentSynchronizationManager>();
-            services.AddSingleton<EnvironmentSynchronizationStore>();
+            try
+			{
+                services.AddSingleton<IConfigurationReader, ConfigurationReader>();
+            } catch (Exception ex)
+			{
+                Logger.Error("AddEnvironmentSynchronization:AddSingleton<IConfigurationReader>", ex);
+                throw;
+            }
+            try
+            {
+                services.AddSingleton<EnvironmentSynchronizationManager>();
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("AddEnvironmentSynchronization:AddSingleton<EnvironmentSynchronizationManager>", ex);
+                throw;
+            }
+            try
+            {
+                services.AddSingleton<EnvironmentSynchronizationStore>();
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("AddEnvironmentSynchronization:AddSingleton<EnvironmentSynchronizationStore>", ex);
+                throw;
+            }
 
+            
             try
             {
                 services.AddSingleton(configuration.GetSection(EnvironmentSynchronizerOptions.EnvironmentSynchronizer).Get<EnvironmentSynchronizerOptions>());
