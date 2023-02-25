@@ -26,9 +26,20 @@ namespace Addon.Episerver.EnvironmentSynchronizer.InitializationModule
 				_executer.Initialize();
 
 			}
+			catch (InvalidOperationException inOpEx)
+			{
+				if (inOpEx.Message.Contains("IInitializationExecuter"))
+				{
+					Logger.Error("Addon.EpiServer.EnvironmentSynchronizer tried to run InitializationModule but 'services.AddEnvironmentSynchronization(_configuration)' looks like it is missing in startup.cs.", inOpEx);
+				} else
+				{
+					Logger.Error("Addon.EpiServer.EnvironmentSynchronizer tried to run InitializationExecuter.Initialize but failed.", inOpEx);
+				}
+				
+			}
 			catch (Exception ex)
 			{
-				Logger.Error("Could not get find or load EnvironmentSynchronizationJob. SynchronizationInitializationModule will not run.", ex);
+				Logger.Error("Could not get load EnvironmentSynchronizationJob. SynchronizationInitializationModule will not run.", ex);
 			}
 
 			//var scheduledJobRepository = ServiceLocator.Current.GetInstance<IScheduledJobRepository>();
