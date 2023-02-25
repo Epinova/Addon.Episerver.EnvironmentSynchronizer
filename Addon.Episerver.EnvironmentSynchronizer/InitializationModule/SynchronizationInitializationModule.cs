@@ -1,7 +1,11 @@
-﻿using EPiServer.Framework;
+﻿using Addon.Episerver.EnvironmentSynchronizer.Configuration;
+using EPiServer.Framework;
 using EPiServer.Framework.Initialization;
 using EPiServer.Logging;
 using EPiServer.ServiceLocation;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace Addon.Episerver.EnvironmentSynchronizer.InitializationModule
 {
@@ -14,10 +18,18 @@ namespace Addon.Episerver.EnvironmentSynchronizer.InitializationModule
 
 		public void Initialize(InitializationEngine context)
 		{
-			var _executer = ServiceLocator.Current.GetInstance<IInitializationExecuter>();
+			try
+			{
+				var _executer = ServiceLocator.Current.GetInstance<IInitializationExecuter>();
 
-			Logger.Information($"InitializableModule:SynchronizationInitializationModule Initialize");
-			_executer.Initialize();
+				Logger.Information($"InitializableModule:SynchronizationInitializationModule Initialize");
+				_executer.Initialize();
+
+			}
+			catch (Exception ex)
+			{
+				Logger.Error("Could not get find or load EnvironmentSynchronizationJob. SynchronizationInitializationModule will not run.", ex);
+			}
 
 			//var scheduledJobRepository = ServiceLocator.Current.GetInstance<IScheduledJobRepository>();
 			//var configReader = ServiceLocator.Current.GetInstance<IConfigurationReader>();
