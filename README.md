@@ -1,9 +1,9 @@
-# Episerver CMS Environment Synchronizer
+# Optimizely/Episerver CMS Environment Synchronizer
 Ensures that content and settings that are stored in the databases are corrected given the current environment. This is helpful after a content synchronization between different Episerver environments.  
 When synchronizing databases between environments there might be things that needs to be configured for each environment.
-This addon provides the infrastructure to add handlers to handle this, including prebuilt handlers for siteDefinitions and ScheduledJobs that can be configured in configuration files (a.k.a. web.config)
+This addon provides the infrastructure to add handlers to handle this, including prebuilt handlers for siteDefinitions and ScheduledJobs that can be configured in configuration files (a.k.a. appSettings.json)
   
-The synchronizer can be run as a InitializationModule or as a ScheduledJob. It depends on what you think is fitting your environment and project.
+The synchronizer can be run as a Startup (see Startup.cs example below), InitializationModule or as a ScheduledJob. It depends on what you think is fitting your environment and project.
 
 ## Installation
 This will be packaged as a Nuget package named Addon.Episerver.EnvironmentSynchronizer and put in Episervers Nuget feed once tested a bit more.  
@@ -168,24 +168,47 @@ The Id is GUID for the ScheduleJob. To get the GUID for the schedule job in the 
 *Note 1: The **Name** field is required to specify in the XML. But the environment synchronizer will only try to match this value if the Id field is empty. And the value can be empty.*   
 *Note 2: The name of the schedule job is not always the same as you can see in the administration interface. I had problem to find the right schedule job because I wrote the english name of the task. And after alot of scratching my head I realized that the names on the schedule jobs where in swedish in the database. So using Id is recommended.*  
 Example 1:  
-```xml
-  <schedulejobs>
-    <schedulejob Id="*" Name="*" IsEnabled="false" />
-    <schedulejob Name="Episerver-notification" IsEnabled="true" />
-  </schedulejobs>
-  <!-- In this example it first go through all ScheduledJobs and disable them.  
-  And then it will enable the job "Episerver-notification". -->
+```json
+    "ScheduledJobs": [
+      {
+        "Id": "*",
+        "Name": "*",
+        "IsEnabled": false
+      },
+      {
+        "Name": "Episerver-notification",
+        "IsEnabled": true
+      }
+    ]
+  "Note": "In this example it first go through all ScheduledJobs and disable them. And then it will enable the job 'Episerver-notification'."
 ```  
 Example 2:  
-```xml
-  <schedulejobs>
-    <schedulejob Id="*" Name="*" IsEnabled="false" />
-    <schedulejob Id="a42f6137-0bcf-4a88-bbd3-0ef219b7eafa" Name="Empty trashcan" IsEnabled="true" AutoRun="true" />
-  </schedulejobs>
-  <!-- In this example it first go through all ScheduledJobs and disable them.  
-  And then it will enable the job "Episerver-notification". -->
+```json
+    "ScheduledJobs": [
+      {
+        "Id": "*",
+        "Name": "*",
+        "IsEnabled": false
+      },
+      {
+        "Id": "a42f6137-0bcf-4a88-bbd3-0ef219b7eafa"
+        "Name": "Empty trashcan",
+        "IsEnabled": false,
+        "AutoRun": true
+      }
+    ]
+    "Note": "In this example it first go through all ScheduledJobs and disable them. And then it will enable the job 'Empty trashcan' and run the schedule job."
 ```
 **IsEnabled** [bool] set if the job should be enabled/disabled. 
 
 **AutoRun** [bool] set if the job should be executed on change of environment. This is an optional attribute that, then not supplied will default to false.  
 If used with a wildcard then the attribute is ignored.
+
+## Run as ScheduleJob
+When Addon.Episerver.EnvironmentSynchronizer is installed you can start synchronization manually at any time by run a schedule job. The schedule job is "Environment Synchronization" and can 
+be found in the list of schedule jobs in administration interface of you Optimizely/Episerver CMS.  
+![Schedule job list in Optimizely/Episerver administration interface](documentation/EnvironmentSynchronizer_ScheduleJobs_List.jpg)  
+If you clik on the schedule job and open up the information page. You can click on the "Start Manually" button to start synchronization.  
+![Start schedule job 'Environment Synchronization'](documentation/EnvironmentSynchronizer_ScheduleJobs_Start.jpg)  
+After the schronization is done. Click on the "History" tab and see the result.  
+![View history of schedule job 'Environment Synchronization'](documentation/EnvironmentSynchronizer_ScheduleJobs_History.jpg)  
