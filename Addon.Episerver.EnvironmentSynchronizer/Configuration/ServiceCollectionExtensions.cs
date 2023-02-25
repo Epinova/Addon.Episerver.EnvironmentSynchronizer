@@ -12,6 +12,21 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 
         public static IServiceCollection AddEnvironmentSynchronization(this IServiceCollection services, IConfiguration configuration)
         {
+            var envSyncOptions = configuration.GetSection(EnvironmentSynchronizerOptions.EnvironmentSynchronizer).Get<EnvironmentSynchronizerOptions>();
+
+            try
+            {
+                services.AddSingleton(configuration.GetSection("EnvironmentSynchronizerOptions").Get<EnvironmentSynchronizerOptions>());
+            }
+            catch (ArgumentNullException argNullEx)
+            {
+                if (argNullEx.Message.Contains("Value cannot be null. (Parameter 'implementationInstance')"))
+                {
+                    Logger.Error("Addon.EpiServer.EnvironmentSynchronizer tried to load configuration from section EnvironmentSynchronization from appsettings.json looks like it is missing.", argNullEx);
+                }
+                throw;
+            }
+
             try
 			{
                 services.AddSingleton<IConfigurationReader, ConfigurationReader>();
@@ -40,18 +55,7 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
             }
 
             
-            try
-            {
-                services.AddSingleton(configuration.GetSection(EnvironmentSynchronizerOptions.EnvironmentSynchronizer).Get<EnvironmentSynchronizerOptions>());
-            }
-            catch (ArgumentNullException argNullEx)
-            {
-                if (argNullEx.Message.Contains("Value cannot be null. (Parameter 'implementationInstance')"))
-				{
-                    Logger.Error("Addon.EpiServer.EnvironmentSynchronizer tried to load configuration from section EnvironmentSynchronization from appsettings.json looks like it is missing.", argNullEx);
-                }
-                throw;
-            }
+            
 
             return services;
         }
