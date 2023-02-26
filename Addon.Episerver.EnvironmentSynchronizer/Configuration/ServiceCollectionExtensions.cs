@@ -29,15 +29,15 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 				Logger.Error("AddEnvironmentSynchronization:AddSingleton<EnvironmentSynchronizationManager>", ex);
 				throw;
 			}
-			//try
-			//{
-			//    services.AddSingleton<EnvironmentSynchronizationStore>();
-			//}
-			//catch (Exception ex)
-			//{
-			//    Logger.Error("AddEnvironmentSynchronization:AddSingleton<EnvironmentSynchronizationStore>", ex);
-			//    throw;
-			//}
+			try
+			{
+				services.AddSingleton<EnvironmentSynchronizationStore>();
+			}
+			catch (Exception ex)
+			{
+				Logger.Error("AddEnvironmentSynchronization:AddSingleton<EnvironmentSynchronizationStore>", ex);
+				throw;
+			}
 
 
 			////var envSyncOptions = configuration.GetSection(EnvironmentSynchronizerOptions.EnvironmentSynchronizer).Get<EnvironmentSynchronizerOptions>();
