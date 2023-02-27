@@ -33,5 +33,6 @@ steps:
 - template: nuget.3.yml@pipelines
   parameters:
     dotnetVersions:
+      - 6.0.x
       - 7.0.x
     workingDirectory: "$(System.DefaultWorkingDirectory)"
