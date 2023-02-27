@@ -2,24 +2,24 @@
   <PropertyGroup>
     <RootNamespace>Addon.Episever.EnvironmentSynchronizer.Test</RootNamespace>
     <AssemblyName>Addon.Episever.EnvironmentSynchronizer.Test</AssemblyName>
-	<TargetFrameworks>net6.0;net7.0</TargetFrameworks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+  </PropertyGroup>
   <ItemGroup>
     <None Remove="test-configs\all-settings.json" />
     <None Remove="test-configs\no-settings.json" />
-	<None Remove="test-configs\test1-settings.json" />
+  </ItemGroup>
+  <ItemGroup>
     <EmbeddedResource Include="test-configs\all-settings.json">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="test-configs\no-settings.json">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
-	<EmbeddedResource Include="test-configs\test1-settings.json">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	</EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Addon.Episerver.EnvironmentSynchronizer\Addon.Episerver.EnvironmentSynchronizer.csproj" />
@@ -40,5 +40,10 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="test-configs\test1-settings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>
