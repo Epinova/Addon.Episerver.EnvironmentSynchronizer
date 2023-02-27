@@ -13,7 +13,7 @@ namespace Addon.Episerver.EnvironmentSynchronizer.InitializationModule
 	{
 		void Initialize();
 	}
-	public class InitializationExecuter
+	public class InitializationExecuter : IInitializationExecuter
 	{
 		private static readonly ILogger Logger = LogManager.GetLogger();
 
