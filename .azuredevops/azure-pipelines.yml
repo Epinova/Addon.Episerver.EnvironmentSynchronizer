@@ -1,7 +1,7 @@
 variables:
   system.debug: false
-  major: 0
-  minor: 4
+  major: 1
+  minor: 0
 
 name: $(major).$(minor).$(rev:r) #Build.BuildNumber
 
@@ -22,8 +22,17 @@ resources:
     ref: refs/heads/main
 
 steps:
+- task: PowerShell@2
+  inputs:
+    targetType: 'inline'
+    script: |
+      # Write your PowerShell commands here.
+      
+      Remove-Item -Path $(System.DefaultWorkingDirectory)\dlls -Force -Recurse
+
 - template: nuget.3.yml@pipelines
   parameters:
     dotnetVersions:
       - 6.0.x
+      - 7.0.x
     workingDirectory: "$(System.DefaultWorkingDirectory)"

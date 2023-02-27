@@ -1,14 +1,8 @@
-﻿using System;
-using Addon.Episerver.EnvironmentSynchronizer.Configuration;
-using Addon.Episerver.EnvironmentSynchronizer.DynamicData;
-using Addon.Episerver.EnvironmentSynchronizer.Jobs;
-using EPiServer.DataAbstraction;
-using EPiServer.Framework;
+﻿using EPiServer.Framework;
 using EPiServer.Framework.Initialization;
 using EPiServer.Logging;
-using EPiServer.PlugIn;
-using EPiServer.Scheduler;
 using EPiServer.ServiceLocation;
+using System;
 
 namespace Addon.Episerver.EnvironmentSynchronizer.InitializationModule
 {
@@ -19,51 +13,30 @@ namespace Addon.Episerver.EnvironmentSynchronizer.InitializationModule
 	{
 		private static readonly ILogger Logger = LogManager.GetLogger();
 
-        public void Initialize(InitializationEngine context)
-        {
-            var scheduledJobRepository =  ServiceLocator.Current.GetInstance<IScheduledJobRepository>();
-			var configReader = ServiceLocator.Current.GetInstance<IConfigurationReader>();
-            var scheduledJobExecutor = ServiceLocator.Current.GetInstance<IScheduledJobExecutor>();
-
-			var syncData = configReader.ReadConfiguration();
-
-			if (syncData.RunAsInitializationModule)
+		public void Initialize(InitializationEngine context)
+		{
+			try
 			{
-				Logger.Information($"Environment Synchronizer found RunAsInitializationModule=true");
-				var runInitialization = true;
-				var environmentSynchronizationManager = ServiceLocator.Current.GetInstance<EnvironmentSynchronizationManager>();
+				var _executer = ServiceLocator.Current.GetInstance<IInitializationExecuter>();
 
-				if (!syncData.RunInitializationModuleEveryStartup)
-				{
-					Logger.Information($"Environment Synchronizer found RunInitializationModuleEveryStartup=false");
-					var store = ServiceLocator.Current.GetInstance<EnvironmentSynchronizationStore>();
-					var stamp = store.GetStamp();
-					if (stamp != null && stamp.Environment == environmentSynchronizationManager.GetEnvironmentName())
-					{
-						runInitialization = false;
-						Logger.Information($"Environment Synchronizer will not run. Stamp match the current environment {stamp.Environment}");
-					}
-				}
+				Logger.Information($"InitializableModule:SynchronizationInitializationModule Initialize");
+				_executer.Initialize();
 
-				if (!runInitialization) { return; }
-
-				try
+			}
+			catch (InvalidOperationException inOpEx)
+			{
+				if (inOpEx.Message.Contains("InitializationExecuter"))
 				{
-					var jobId =
-						((ScheduledPlugInAttribute) typeof(EnvironmentSynchronizationJob).GetCustomAttributes(
-							typeof(ScheduledPlugInAttribute), true)[0]).GUID;
-					var job = scheduledJobRepository.Get(Guid.Parse(jobId));
-                    scheduledJobExecutor.StartAsync(job,
-                        new JobExecutionOptions
-                        {
-                            RunSynchronously = true,
-                            Trigger = ScheduledJobTrigger.User
-                        });
-				}
-				catch (Exception ex)
+					Logger.Error("Addon.EpiServer.EnvironmentSynchronizer tried to run InitializationModule but 'services.AddEnvironmentSynchronization();' looks like it is missing in startup.cs.", inOpEx);
+				} else
 				{
-					Logger.Error("Could not get find or load EnvironmentSynchronizationJob. SynchronizationInitializationModule will not run.", ex);
+					Logger.Error("Addon.EpiServer.EnvironmentSynchronizer tried to run InitializationExecuter.Initialize but failed.", inOpEx);
 				}
+				
+			}
+			catch (Exception ex)
+			{
+				Logger.Error("Could not get load EnvironmentSynchronizationJob. SynchronizationInitializationModule will not run.", ex);
 			}
 		}
 
@@ -72,5 +45,5 @@ namespace Addon.Episerver.EnvironmentSynchronizer.InitializationModule
 		public void Uninitialize(InitializationEngine context) { }
 
 
-    }
+	}
 }

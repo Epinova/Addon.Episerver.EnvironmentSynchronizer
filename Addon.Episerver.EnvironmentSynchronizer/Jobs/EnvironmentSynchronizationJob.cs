@@ -38,6 +38,7 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Jobs
 			catch (Exception ex)
 			{
 				Logger.Error("Error when run Environment Synchronization job.", ex);
+				resultLog.AppendLine($"Environment synchronization job failed. More information in the log file.");
 			}
 
 			tmr.Stop();

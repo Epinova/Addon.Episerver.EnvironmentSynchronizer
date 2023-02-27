@@ -1,15 +1,20 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30621.155
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33414.496
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Addon.Episerver.EnvironmentSynchronizer", "Addon.Episerver.EnvironmentSynchronizer\Addon.Episerver.EnvironmentSynchronizer.csproj", "{C06A863E-E799-4D7F-BC89-969B843A1829}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Addon.Episerver.EnvironmentSynchronizer", "Addon.Episerver.EnvironmentSynchronizer\Addon.Episerver.EnvironmentSynchronizer.csproj", "{C06A863E-E799-4D7F-BC89-969B843A1829}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Addon.Episerver.EnvironmentSynchronizer.Test", "Addon.Episever.EnvironmentSynchronizer.Test\Addon.Episerver.EnvironmentSynchronizer.Test.csproj", "{3A19B2C4-8EA1-4BA5-937C-F7EE8BB41580}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Addon.Episerver.EnvironmentSynchronizer.Test", "Addon.Episever.EnvironmentSynchronizer.Test\Addon.Episerver.EnvironmentSynchronizer.Test.csproj", "{3A19B2C4-8EA1-4BA5-937C-F7EE8BB41580}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{886607B0-4954-4DED-962B-0B2BC85CAE15}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DevOps", "DevOps", "{2930C838-698D-4941-A978-1EB0F2B560E1}"
+	ProjectSection(SolutionItems) = preProject
+		.azuredevops\azure-pipelines.yml = .azuredevops\azure-pipelines.yml
 	EndProjectSection
 EndProject
 Global
