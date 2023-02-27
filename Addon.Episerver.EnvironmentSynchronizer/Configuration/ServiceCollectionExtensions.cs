@@ -10,7 +10,7 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
         {
             services.AddSingleton<IConfigurationReader, ConfigurationReader>();
 			services.AddSingleton<IEnvironmentSynchronizationManager, EnvironmentSynchronizationManager>();
-			services.AddSingleton<IEnvironmentSynchronizationStore, EnvironmentSynchronizationStore>();
+			services.AddTransient<IEnvironmentSynchronizationStore, EnvironmentSynchronizationStore>(); // Need to be Transient to be able to store information to database without thread problem.
 			services.AddSingleton<IInitializationExecuter, InitializationExecuter>();
 			services.AddOptions<EnvironmentSynchronizerOptions>().BindConfiguration(EnvironmentSynchronizerOptions.EnvironmentSynchronizer);
 
