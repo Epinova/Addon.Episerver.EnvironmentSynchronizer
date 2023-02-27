@@ -36,3 +36,9 @@ steps:
       - 6.0.x
       - 7.0.x
     workingDirectory: "$(System.DefaultWorkingDirectory)"
+
+- task: PublishCodeCoverageResults@1
+  displayName: Publish Code Coverage Results
+  inputs:
+    codeCoverageTool: cobertura
+    summaryFileLocation: $(TestResultsPath)/**/coverage.cobertura.xml
