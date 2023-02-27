@@ -79,6 +79,9 @@ namespace Addon.Episerver.EnvironmentSynchronizer.InitializationModule
 				{
 					Logger.Error("Could not get find or load EnvironmentSynchronizationJob. SynchronizationInitializationModule will not run.", ex);
 				}
+			} else
+			{
+				Logger.Information($"Environment Synchronizer found RunAsInitializationModule=false");
 			}
 		}
 
