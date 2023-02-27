@@ -75,7 +75,7 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Synchronizers.ScheduledJobs
                 }
 
                 existingScheduledJob.IsEnabled = job.IsEnabled;
-                Logger.Debug($"Set {existingScheduledJob.Name} ({existingScheduledJob.ID}) to IsEnabled={job.IsEnabled}. After * (wildcard) spec.");
+                Logger.Information($"Set {existingScheduledJob.Name} ({existingScheduledJob.ID}) to IsEnabled={job.IsEnabled}. After * (wildcard) spec.");
                 _resultLog.AppendLine($"Set {existingScheduledJob.Name} ({existingScheduledJob.ID}) to IsEnabled={job.IsEnabled}. After * (wildcard) spec.<br />");
                 _scheduledJobRepository.Save(existingScheduledJob);
             }
@@ -119,7 +119,7 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Synchronizers.ScheduledJobs
             if (existingJob != null)
             {
                 existingJob.IsEnabled = job.IsEnabled;
-                Logger.Debug($"Set {existingJob.Name} ({existingJob.ID}) to IsEnabled={job.IsEnabled}.");
+                Logger.Information($"Set {existingJob.Name} ({existingJob.ID}) to IsEnabled={job.IsEnabled}.");
                 _resultLog.AppendLine($"Set {existingJob.Name} ({existingJob.ID}) to IsEnabled={job.IsEnabled}.<br />");
                 _scheduledJobRepository.Save(existingJob);
             }
@@ -157,7 +157,7 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Synchronizers.ScheduledJobs
                         Trigger = ScheduledJobTrigger.User
                     });
 
-                Logger.Debug($"Ran {existingJob.Name} ({existingJob.ID}).");
+                Logger.Information($"Ran {existingJob.Name} ({existingJob.ID}).");
                 _resultLog.AppendLine($"Ran {existingJob.Name} ({existingJob.ID}).<br />");
                 
             }
