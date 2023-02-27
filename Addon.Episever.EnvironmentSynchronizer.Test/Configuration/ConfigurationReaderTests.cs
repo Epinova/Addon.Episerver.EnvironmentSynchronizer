@@ -81,6 +81,31 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration.Tests
 			options.ScheduledJobs.Should().BeNull();
 		}
 
+		[Fact()]
+		public void ReadConfiguration_SiteDefinition_Test1_Settings_Test()
+		{
+			// Arrange
+			var configName = "test1-settings.json";
+
+
+			// Act
+			var options = GetConfiguration(configName);
+
+			// Assert
+			options.Should().NotBeNull();
+
+			options.RunAsInitializationModule.Should().BeFalse();
+			options.RunInitializationModuleEveryStartup.Should().BeFalse();
+
+			options.ScheduledJobs.Should().NotBeNull();
+			options.ScheduledJobs.Should().HaveCount(2);
+
+			options.ScheduledJobs[0].Id.Should().Be("8bd1ac63-9ed3-42e1-9b63-76498ab5ac94");
+			options.ScheduledJobs[0].Name.Should().Be("Optimizely Notifications");
+			options.ScheduledJobs[0].IsEnabled.Should().BeFalse();
+			options.ScheduledJobs[0].AutoRun.Should().BeFalse();
+		}
+
 		public static EnvironmentSynchronizerOptions GetConfiguration(string name)
 		{
 			string[] paths = { Environment.CurrentDirectory, "test-configs" };

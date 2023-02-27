@@ -1,0 +1,100 @@
+{
+  "EnvironmentSynchronizer": {
+    "RunAsInitializationModule": false,
+    "RunInitializationModuleEveryStartup": false,
+    "scheduledjobs": [
+      {
+        "Id": "8bd1ac63-9ed3-42e1-9b63-76498ab5ac94",
+        "Name": "Optimizely Notifications",
+        "IsEnabled": false
+      },
+      {
+        "Id": "25fa8f7a-fa10-4375-9a9b-27766a54f3cb",
+        "Name": "Visitor Criterion Fix",
+        "IsEnabled": false
+      }
+    ],
+    "SiteDefinitions": [
+      {
+        "Id": "af4fdb8a-de6a-40de-a37b-e89c4e974231",
+        "Name": "sitename",
+        "SiteUrl": "https://www.site.se/",
+        "Hosts": [
+          {
+            "Name": "*",
+            "UseSecureConnection": false,
+            "Language": "sv"
+          },
+          {
+            "Name": "hxfh02mstrl2tq7prep.dxcloud.episerver.net",
+            "UseSecureConnection": true,
+            "Language": "sv"
+          },
+          {
+            "Name": "hxfh02mstrl2tq7inte.dxcloud.episerver.net",
+            "UseSecureConnection": true,
+            "Language": "sv"
+          },
+          {
+            "Name": "localhost:9240",
+            "UseSecureConnection": true,
+            "Language": "sv"
+          },
+          {
+            "Name": "integration.site.se",
+            "UseSecureConnection": true,
+            "Language": "sv"
+          },
+          {
+            "Name": "integration.site.dk",
+            "UseSecureConnection": true,
+            "Language": "da"
+          },
+          {
+            "Name": "integration.site.com",
+            "UseSecureConnection": true,
+            "Language": "en"
+          },
+          {
+            "Name": "preprod.site.dk",
+            "UseSecureConnection": true,
+            "Language": "da"
+          },
+          {
+            "Name": "preprod.site.com",
+            "UseSecureConnection": true,
+            "Language": "en"
+          },
+          {
+            "Name": "preprod.site.se",
+            "UseSecureConnection": true,
+            "Language": "sv"
+          },
+          {
+            "Name": "hxfh01mstre131qprod-slot.dxcloud.episerver.net",
+            "UseSecureConnection": true,
+            "Language": "sv"
+          },
+          {
+            "Name": "www.site.se",
+            "UseSecureConnection": true,
+            "Language": "sv",
+            "Type": "Primary"
+          },
+          {
+            "Name": "www.site.com",
+            "UseSecureConnection": true,
+            "Language": "en",
+            "Type": "Primary"
+          },
+          {
+            "Name": "www.site.dk",
+            "UseSecureConnection": true,
+            "Language": "da",
+            "Type": "Primary"
+          }
+        ]
+      }
+    ]
+  }
+}
