@@ -112,12 +112,18 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration.Tests
 			string fullPath = Path.Combine(paths);
 			var configuration = new EnvironmentSynchronizerOptions();
 
-			new ConfigurationBuilder()
+			var configurationBuilder = new ConfigurationBuilder();
+			configurationBuilder
 				.SetBasePath(fullPath)
 				.AddJsonFile(name, optional: true)
 				.Build()
 				.GetSection(EnvironmentSynchronizerOptions.EnvironmentSynchronizer)
 				.Bind(configuration);
+
+
+
+			//var envSyncOptions = configurationBuilder.GetSection(EnvironmentSynchronizerOptions.EnvironmentSynchronizer).Get<EnvironmentSynchronizerOptions>();
+			//services.AddSingleton<EnvironmentSynchronizerOptions>(envSyncOptions);
 
 			return configuration;
 		}

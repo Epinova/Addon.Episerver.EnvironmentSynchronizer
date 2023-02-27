@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Globalization;
+using Microsoft.Extensions.Options;
 
 namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 {
@@ -14,13 +15,9 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 
 		private readonly EnvironmentSynchronizerOptions _configuration;
 
-		//public ConfigurationReader()
-		//{
-		//}
-
-		public ConfigurationReader(EnvironmentSynchronizerOptions synchronizerConfiguration)
+		public ConfigurationReader(IOptions<EnvironmentSynchronizerOptions> synchronizerConfiguration)
         {
-			_configuration = synchronizerConfiguration;
+			_configuration = synchronizerConfiguration.Value;
         }
 
 		public SynchronizationData ReadConfiguration()

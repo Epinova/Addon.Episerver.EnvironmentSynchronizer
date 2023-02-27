@@ -6,6 +6,7 @@ using EPiServer.DataAbstraction;
 using EPiServer.Logging;
 using EPiServer.PlugIn;
 using EPiServer.Scheduler;
+using EPiServer.ServiceLocation;
 
 namespace Addon.Episerver.EnvironmentSynchronizer.InitializationModule
 {
@@ -13,6 +14,8 @@ namespace Addon.Episerver.EnvironmentSynchronizer.InitializationModule
 	{
 		void Initialize();
 	}
+
+	[ServiceConfiguration(typeof(IInitializationExecuter))]
 	public class InitializationExecuter : IInitializationExecuter
 	{
 		private static readonly ILogger Logger = LogManager.GetLogger();
@@ -23,7 +26,12 @@ namespace Addon.Episerver.EnvironmentSynchronizer.InitializationModule
 		private readonly IEnvironmentSynchronizationManager _environmentSynchronizationManager;
 		private readonly IEnvironmentSynchronizationStore _environmentSynchronizationStore;
 
-		public InitializationExecuter(IScheduledJobRepository scheduledJobRepository, IConfigurationReader configurationReader, IScheduledJobExecutor scheduledJobExecutor, IEnvironmentSynchronizationManager environmentSynchronizationManager, IEnvironmentSynchronizationStore environmentSynchronizationStore)
+		public InitializationExecuter(
+			IScheduledJobRepository scheduledJobRepository, 
+			IConfigurationReader configurationReader, 
+			IScheduledJobExecutor scheduledJobExecutor, 
+			IEnvironmentSynchronizationManager environmentSynchronizationManager, 
+			IEnvironmentSynchronizationStore environmentSynchronizationStore)
 		{
 			_scheduledJobRepository = scheduledJobRepository;
 			_configurationReader = configurationReader;

@@ -2,10 +2,10 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <Deterministic>false</Deterministic>
-	<TargetFramework>net6.0</TargetFramework>
+	<TargetFrameworks>net6.0;net7.0</TargetFrameworks>
 	<IsPackable>true</IsPackable>
 	<DebugType>embedded</DebugType>
-	<Version>0.3.1</Version>
+	<Version>0.6.1</Version>
 	<Title>Epinova - Environment Synchronizer</Title>
 	<Authors>Ove Lartelius, Linus Ekström</Authors>
 	<Owners>Epinova AB</Owners>
@@ -17,11 +17,15 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="EPiServer.CMS.AspNetCore" Version="12.4.0" />
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.0" />
-  </ItemGroup>
-  <ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0' ">
+		<PackageReference Include="EPiServer.CMS.AspNetCore" Version="12.4.0" />
+		<PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.0" />
+	</ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)' == 'net7.0' ">
+		<PackageReference Include="EPiServer.CMS.AspNetCore" Version="12.11.0" />
+		<PackageReference Include="System.Configuration.ConfigurationManager" Version="7.0.0" />
+	</ItemGroup>
+	<ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 </Project>
