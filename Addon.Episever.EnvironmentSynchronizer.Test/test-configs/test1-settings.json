@@ -2,7 +2,7 @@
   "EnvironmentSynchronizer": {
     "RunAsInitializationModule": false,
     "RunInitializationModuleEveryStartup": false,
-    "scheduledjobs": [
+    "ScheduledJobs": [
       {
         "Id": "8bd1ac63-9ed3-42e1-9b63-76498ab5ac94",
         "Name": "Optimizely Notifications",

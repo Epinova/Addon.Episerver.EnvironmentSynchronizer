@@ -2,7 +2,7 @@
   "EnvironmentSynchronizer": {
     "RunAsInitializationModule": true,
     "RunInitializationModuleEveryStartup": false,
-    "scheduledjobs": [
+    "ScheduledJobs": [
       {
         "Id": "*",
         "Name": "*",
