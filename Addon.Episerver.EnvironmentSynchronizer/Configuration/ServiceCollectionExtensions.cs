@@ -62,7 +62,7 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 				{
 					Logger.Error("Addon.EpiServer.EnvironmentSynchronizer tried to load configuration from section EnvironmentSynchronization from appsettings.json looks like it is missing.", argNullEx);
 				}
-				throw;
+				//throw;
 			}
 
 
