@@ -18,13 +18,8 @@
   </PropertyGroup>
 	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0' ">
 		<PackageReference Include="EPiServer.CMS.AspNetCore" Version="12.4.0" />
-		<PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.0" />
 	</ItemGroup>
 	<ItemGroup Condition="'$(TargetFramework)' == 'net7.0' ">
 		<PackageReference Include="EPiServer.CMS.AspNetCore" Version="12.11.0" />
-		<PackageReference Include="System.Configuration.ConfigurationManager" Version="7.0.0" />
 	</ItemGroup>
-	<ItemGroup>
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
-  </ItemGroup>
 </Project>
