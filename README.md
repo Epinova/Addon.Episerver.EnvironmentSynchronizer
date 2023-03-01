@@ -18,6 +18,7 @@ Example .json
       {
         "name": "CustomerX",
         "SiteUrl": "https://custxmstr972znb5prep.azurewebsites.net/",
+        "ForceLogin": true,
         "Hosts": [
           {
             "Name": "*",
@@ -27,6 +28,12 @@ Example .json
             "Name": "custxmstr972znb5prep-slot.azurewebsites.net",
             "UseSecureConnection": true,
             "Language": "en"
+          },
+          {
+            "Name": "custxmstr972znb5prep.azurewebsites.net",
+            "UseSecureConnection": true,
+            "Language": "en",
+            "Type": "Primary"
           }
         ]
       }
@@ -110,14 +117,39 @@ namespace Yoursite.Infrastructure.Environments
     }
 }
 ```
+In the example above it loads the setting/configuration value from the environment variables in DXP or IIS.  
+```csharp
+using Addon.Episerver.EnvironmentSynchronizer;
+using EPiServer.ServiceLocation;
+using Microsoft.Extensions.Configuration;
+
+namespace Yoursite.Infrastructure.Environments
+{
+   [ServiceConfiguration(typeof(IEnvironmentNameSource))]
+    public class EnvironmentNameSource : IEnvironmentNameSource
+    {
+        private readonly IConfiguration Configuration;
+
+        public EnvironmentNameSource(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        public string GetCurrentEnvironmentName()
+        {
+            return Configuration["EnvironmentSettings.Environment"];
+        }
+    }
+}
+```
 In the example above it loads the setting/configuration value from appsettings.json with the name "EnvironmentSettings.Environment".  
 ```json
 {
   "EnvironmentSettings.Environment": "dev",
 }
 ```
-### DXP variable episerver:EnvironmentName support
-If you don´t implement the logic specified above. The DXP variable ´episerver:EnvironmentName´ will be used. More information about the DXP environments and the appsetting can be found on [https://world.episerver.com/documentation/developer-guides/digital-experience-platform/development-considerations/environment-configurations/](https://world.episerver.com/documentation/developer-guides/digital-experience-platform/development-considerations/environment-configurations/)  
+### DXP variable ASPNETCORE_ENVIRONMENT support
+If you don´t implement the logic specified above. The DXP variable ´ASPNETCORE_ENVIRONMENT´ will be used. More information about the DXP environments and the appsetting can be found on [https://world.episerver.com/documentation/developer-guides/digital-experience-platform/development-considerations/environment-configurations/](https://world.episerver.com/documentation/developer-guides/digital-experience-platform/development-considerations/environment-configurations/)  
 So if you don´t set this variable yourself you will get the following values:  
 1. In your local environment: "" (empty value)
 2. In the integration environment: "Integration"  
@@ -134,7 +166,8 @@ This function is implemented for these projects that don´t want the payload of 
 ### sitedefinition
 **Id** is the GUID that identify the site. If this is provided it will ignore the "Name" attribute.  
 **Name** is the name of the sitedefinition that will be updated. If **Id** is not specified it will match the existing SiteDefinition in the Episerver CMS against this name.  
-**SiteUrl*** is the SiteUrl that this site should have/use.  
+**SiteUrl*** is the SiteUrl that this site should have/use.
+[**ForceLogin***](/Documentation/ForceLogin.md) will remove 'Everyone' AccessLevel.Read if it is found for the site.
 
 ### hosts
 You need to specify all the hosts that the site needs. When the synchronizer is updating a SiteDefinition it will expect that you have specified all hostnames. So of you in Episerver CMS has a extra host that is not specified in the web.config it will be removed.

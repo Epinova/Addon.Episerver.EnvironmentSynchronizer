@@ -36,15 +36,19 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 
 				if (_configuration.SiteDefinitions != null && _configuration.SiteDefinitions.Count > 0)
 				{
-					syncData.SiteDefinitions = new List<SiteDefinition>();
+					syncData.SiteDefinitions = new List<EnvironmentSynchronizerSiteDefinition>();
+					//syncData.SiteDefinitions = new List<SiteDefinition>();
 					foreach (var options in _configuration.SiteDefinitions)
 					{
-						var siteDefinition = new SiteDefinition()
+						var siteDefinition = new EnvironmentSynchronizerSiteDefinition()
+						//var siteDefinition = new SiteDefinition()
 						{
 							Id = string.IsNullOrEmpty(options.Id) ? Guid.Empty : new Guid(options.Id),
 							Name = string.IsNullOrEmpty(options.Name) ? string.Empty : options.Name,
 							SiteUrl = string.IsNullOrEmpty(options.SiteUrl) ? null : new Uri(options.SiteUrl),
-							Hosts = ToHostDefinitions(options.Hosts)
+							Hosts = ToHostDefinitions(options.Hosts),
+							ForceLogin = options.ForceLogin
+							//Roles = ToRoleDefinitions(options.Roles),
 						};
 						if (!string.IsNullOrEmpty(siteDefinition.Name) && siteDefinition.SiteUrl != null)
 						{
@@ -77,6 +81,17 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 					Logger.Information($"Found no schedule jobs to handle.");
 				}
 			}
+			catch (ArgumentException argEx)
+			{
+				if (argEx.Message.Contains("is not a valid host name"))
+				{
+					Logger.Error($"EnvironmentSynchronizer configuration found in the appSettings.json but there are hostnames that is not valid.", argEx);
+				} else
+				{
+					Logger.Error($"EnvironmentSynchronizer configuration found in the appSettings.json but some arguments is not correct.", argEx);
+				}
+				
+			}
 			catch (Exception ex)
 			{
 				Logger.Error($"No configuration found in the appSettings.json. Missing EnvironmentSynchronizer section.", ex);
@@ -97,5 +112,18 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 				};
 			}).ToList();
 		}
+
+		//private List<EnvironmentSynchronizerRoleDefinition> ToRoleDefinitions(IList<RoleOptions> hosts)
+		//{
+		//	return hosts.Select(hostOptions => {
+		//		return new HostDefinition
+		//		{
+		//			Name = hostOptions.Name,
+		//			Type = hostOptions.Type != HostDefinitionType.Undefined ? hostOptions.Type : HostDefinitionType.Undefined,
+		//			UseSecureConnection = hostOptions.UseSecureConnection,
+		//			Language = string.IsNullOrEmpty(hostOptions.Language) ? null : new CultureInfo(hostOptions.Language)
+		//		};
+		//	}).ToList();
+		//}
 	}
 }

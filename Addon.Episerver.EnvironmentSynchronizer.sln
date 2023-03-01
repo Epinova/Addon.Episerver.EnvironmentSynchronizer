@@ -9,6 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Addon.Episerver.Environment
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{886607B0-4954-4DED-962B-0B2BC85CAE15}"
 	ProjectSection(SolutionItems) = preProject
+		documentation\ForceLogin.md = documentation\ForceLogin.md
 		README.md = README.md
 	EndProjectSection
 EndProject

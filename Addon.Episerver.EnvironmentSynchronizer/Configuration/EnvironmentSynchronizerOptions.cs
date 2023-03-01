@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using EPiServer.Web;
 
@@ -13,7 +12,7 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 
         public bool RunInitializationModuleEveryStartup {  get; set;}
 
-        public IList<SiteDefinitionOptions> SiteDefinitions { get; set; }
+		public IList<SiteDefinitionOptions> SiteDefinitions { get; set; }
 
         public IList<ScheduledJobOptions> ScheduledJobs { get; set; }
 
@@ -44,9 +43,13 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
         [Required]
         public string SiteUrl { get; set; }
 
-        [Required]
+		public bool ForceLogin { get; set; }
+
+		[Required]
         public IList<HostOptions> Hosts { get; set; }
-    }
+
+		//public IList<RoleOptions> Roles { get; set; }
+	}
 
     public class HostOptions
     {
@@ -58,4 +61,11 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 
         public string Language { get; set; }
     }
+
+    //public class RoleOptions
+    //{
+    //    public string Name { get; set; }
+
+    //    //public int AccessLevel { get; set; }
+    //}
 }
