@@ -22,4 +22,7 @@
 	<ItemGroup Condition="'$(TargetFramework)' == 'net7.0' ">
 		<PackageReference Include="EPiServer.CMS.AspNetCore" Version="12.11.0" />
 	</ItemGroup>
+	<ItemGroup>
+		<InternalsVisibleTo Include="Addon.Episerver.EnvironmentSynchronizer.Test" />
+	</ItemGroup>
 </Project>

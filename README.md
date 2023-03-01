@@ -35,7 +35,9 @@ Example .json
             "Language": "en",
             "Type": "Primary"
           }
-        ]
+        ],
+        "SetRoles": [],
+        "RemoveRoles": []
       }
     ],
     "ScheduledJobs": [
@@ -183,6 +185,71 @@ Options (`EPiServer.Web.HostDefinitionType [Enum]`):
 - **RedirectPermanent**
 - **RedirectTemporary**
 **Language** is the CultureInfo that is related to the hostname  
+
+### SetRoles
+Can contain a list of roles that will be added/updated. If not exist in existing list it will be added. If it exist, the AccessLevel will be updated with the 
+access level you specified in the configuration. Note: The permission will be set on startpage of the site and all childpages.  
+```json
+"EnvironmentSynchronizerOptions": {
+    ...
+    "SiteDefinitions": [
+      {
+        ...
+        "SetRoles": [
+            {
+                "Name": "CmsAdmins",
+                "Access": [
+                    "FullAccess"
+                ]
+            },
+            {
+                "Name": "CmsEditors",
+                "Access": [
+                    "Read",
+                    "Create",
+                    "Edit",
+                    "Delete",
+                    "Publish"
+                ]
+            }
+        ],
+        ...
+      }
+    ]
+    ...
+  }
+```
+**Name** is the name of the role. Example CmsEditors  
+**Access** is the AccessLevel that should be set for the role. It is the enum EPiServer.Security.AccessLevel that are used by Episerver CMS. If the Access is not specified it will be set to `NoAccess`.  
+Options (`EPiServer.Security.AccessLevel [Enum]`):  
+- **NoAccess** No access to an item
+- **Read** Read access to an item
+- **Create** Create access for an item, i e create new items below this item
+- **Edit** Change / create new versions of this item
+- **Delete** Delete this item
+- **Publish** Publish/unpublish items and versions of an item
+- **Administer** Set access rights for an item
+- **FullAccess** Full access for an item
+
+### RemoveRoles
+Can contain a list of roles that will be removed. If role exist, the role will be removed from the site (No access). Note: The permission will be set on startpage of the site and all childpages.  
+```json
+"EnvironmentSynchronizerOptions": {
+    ...
+    "SiteDefinitions": [
+      {
+        ...
+        "RemoveRoles": [
+            "CmsAdmins",
+            "Everyone"
+        ],
+        ...
+      }
+    ]
+    ...
+  }
+```
+**Name** is the name of the role. Example CmsEditors  
 
 ## scheduledjobs
 You can specify 0 to many Scheduledjob that should be updated.

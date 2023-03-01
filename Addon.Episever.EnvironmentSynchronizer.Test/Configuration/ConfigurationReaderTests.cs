@@ -45,6 +45,22 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration.Tests
 			options.SiteDefinitions[0].Hosts[0].Name.Should().Be("*");
 			options.SiteDefinitions[0].Hosts[0].Language.Should().Be("en");
 			options.SiteDefinitions[0].Hosts[0].UseSecureConnection.Should().BeFalse();
+			options.SiteDefinitions[0].ForceLogin.Should().BeTrue();
+
+			options.SiteDefinitions[0].SetRoles.Should().HaveCount(2);
+			options.SiteDefinitions[0].SetRoles[0].Name.Should().Be("WebAdmins");
+			options.SiteDefinitions[0].SetRoles[0].Access.Should().HaveCount(1);
+			options.SiteDefinitions[0].SetRoles[0].Access[0].Should().Be("FullAccess");
+
+			options.SiteDefinitions[0].SetRoles[1].Name.Should().Be("WebEditors");
+			options.SiteDefinitions[0].SetRoles[1].Access.Should().HaveCount(3);
+			options.SiteDefinitions[0].SetRoles[1].Access[0].Should().Be("Read");
+			options.SiteDefinitions[0].SetRoles[1].Access[1].Should().Be("Create");
+			options.SiteDefinitions[0].SetRoles[1].Access[2].Should().Be("Change");
+
+			options.SiteDefinitions[0].RemoveRoles.Should().HaveCount(2);
+			options.SiteDefinitions[0].RemoveRoles[0].Should().Be("Everyone");
+			options.SiteDefinitions[0].RemoveRoles[1].Should().Be("TESTER");
 
 			// Scheduled jobs
 			options.ScheduledJobs.Should().NotBeNull();
@@ -127,5 +143,9 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration.Tests
 
 			return configuration;
 		}
+
+		
 	}
+
+	
 }

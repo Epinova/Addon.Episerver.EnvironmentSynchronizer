@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Globalization;
 using Microsoft.Extensions.Options;
+using EPiServer.Security;
 
 namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 {
@@ -37,19 +38,9 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 				if (_configuration.SiteDefinitions != null && _configuration.SiteDefinitions.Count > 0)
 				{
 					syncData.SiteDefinitions = new List<EnvironmentSynchronizerSiteDefinition>();
-					//syncData.SiteDefinitions = new List<SiteDefinition>();
 					foreach (var options in _configuration.SiteDefinitions)
 					{
-						var siteDefinition = new EnvironmentSynchronizerSiteDefinition()
-						//var siteDefinition = new SiteDefinition()
-						{
-							Id = string.IsNullOrEmpty(options.Id) ? Guid.Empty : new Guid(options.Id),
-							Name = string.IsNullOrEmpty(options.Name) ? string.Empty : options.Name,
-							SiteUrl = string.IsNullOrEmpty(options.SiteUrl) ? null : new Uri(options.SiteUrl),
-							Hosts = ToHostDefinitions(options.Hosts),
-							ForceLogin = options.ForceLogin
-							//Roles = ToRoleDefinitions(options.Roles),
-						};
+						var siteDefinition = CreateEnvironmentSynchronizerSiteDefinition(options);
 						if (!string.IsNullOrEmpty(siteDefinition.Name) && siteDefinition.SiteUrl != null)
 						{
 							syncData.SiteDefinitions.Add(siteDefinition);
@@ -100,6 +91,22 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 			return syncData;
 		}
 
+		private EnvironmentSynchronizerSiteDefinition CreateEnvironmentSynchronizerSiteDefinition(SiteDefinitionOptions options)
+		{
+			var siteDefinition = new EnvironmentSynchronizerSiteDefinition()
+			{
+				Id = string.IsNullOrEmpty(options.Id) ? Guid.Empty : new Guid(options.Id),
+				Name = string.IsNullOrEmpty(options.Name) ? string.Empty : options.Name,
+				SiteUrl = string.IsNullOrEmpty(options.SiteUrl) ? null : new Uri(options.SiteUrl),
+				Hosts = ToHostDefinitions(options.Hosts),
+				ForceLogin = options.ForceLogin,
+				SetRoles = options.SetRoles != null ? ToSetRoleDefinitions(options.SetRoles) : new List<SetRoleDefinition>(),
+				RemoveRoles = options.RemoveRoles != null ? ToRemoveRoleDefinitions(options.RemoveRoles) : new List<RemoveRoleDefinition>()
+			};
+
+			return siteDefinition;
+		}
+
 		private List<HostDefinition> ToHostDefinitions(IList<HostOptions> hosts)
 		{
 			return hosts.Select(hostOptions => {
@@ -113,17 +120,27 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 			}).ToList();
 		}
 
-		//private List<EnvironmentSynchronizerRoleDefinition> ToRoleDefinitions(IList<RoleOptions> hosts)
-		//{
-		//	return hosts.Select(hostOptions => {
-		//		return new HostDefinition
-		//		{
-		//			Name = hostOptions.Name,
-		//			Type = hostOptions.Type != HostDefinitionType.Undefined ? hostOptions.Type : HostDefinitionType.Undefined,
-		//			UseSecureConnection = hostOptions.UseSecureConnection,
-		//			Language = string.IsNullOrEmpty(hostOptions.Language) ? null : new CultureInfo(hostOptions.Language)
-		//		};
-		//	}).ToList();
-		//}
+		private List<SetRoleDefinition> ToSetRoleDefinitions(IList<SetRoleOptions> setRoles)
+		{
+			return setRoles.Select(setRoleOptions =>
+			{
+				return new SetRoleDefinition
+				{
+					Name = setRoleOptions.Name,
+					Access = setRoleOptions.Access != null ? AccessLevelConverter.ConvertToAccessLevel(setRoleOptions.Access) : AccessLevel.NoAccess,
+				};
+			}).ToList();
+		}
+
+		private List<RemoveRoleDefinition> ToRemoveRoleDefinitions(IList<string> removeRoles)
+		{
+			return removeRoles.Select(removeRoleOptions =>
+			{
+				return new RemoveRoleDefinition
+				{
+					Name = removeRoleOptions
+				};
+			}).ToList();
+		}
 	}
 }
