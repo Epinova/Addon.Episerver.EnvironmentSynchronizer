@@ -40,7 +40,8 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration.Tests
 			options.SiteDefinitions[0].Id.Should().Be("6AAEAF2F-20F9-41EB-8260-D0BBA76DB141");
 			options.SiteDefinitions[0].Name.Should().Be("CustomerX");
 			options.SiteDefinitions[0].SiteUrl.Should().Be("https://custxmstr972znb5prep.azurewebsites.net/");
-			options.SiteDefinitions[0].Hosts.Should().HaveCount(2);
+			options.SiteDefinitions[0].Hosts.Should().HaveCount(2); 
+			options.SiteDefinitions[0].ForceLogin.Should().BeTrue();
 
 			options.SiteDefinitions[0].Hosts[0].Name.Should().Be("*");
 			options.SiteDefinitions[0].Hosts[0].Language.Should().Be("en");
@@ -86,7 +87,6 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration.Tests
 		{
 			// Arrange
 			var configName = "test1-settings.json";
-
 
 			// Act
 			var options = GetConfiguration(configName);

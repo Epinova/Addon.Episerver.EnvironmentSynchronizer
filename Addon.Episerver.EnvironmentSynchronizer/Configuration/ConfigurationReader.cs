@@ -37,18 +37,15 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 				if (_configuration.SiteDefinitions != null && _configuration.SiteDefinitions.Count > 0)
 				{
 					syncData.SiteDefinitions = new List<EnvironmentSynchronizerSiteDefinition>();
-					//syncData.SiteDefinitions = new List<SiteDefinition>();
 					foreach (var options in _configuration.SiteDefinitions)
 					{
 						var siteDefinition = new EnvironmentSynchronizerSiteDefinition()
-						//var siteDefinition = new SiteDefinition()
 						{
 							Id = string.IsNullOrEmpty(options.Id) ? Guid.Empty : new Guid(options.Id),
 							Name = string.IsNullOrEmpty(options.Name) ? string.Empty : options.Name,
 							SiteUrl = string.IsNullOrEmpty(options.SiteUrl) ? null : new Uri(options.SiteUrl),
 							Hosts = ToHostDefinitions(options.Hosts),
 							ForceLogin = options.ForceLogin
-							//Roles = ToRoleDefinitions(options.Roles),
 						};
 						if (!string.IsNullOrEmpty(siteDefinition.Name) && siteDefinition.SiteUrl != null)
 						{
@@ -112,18 +109,5 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 				};
 			}).ToList();
 		}
-
-		//private List<EnvironmentSynchronizerRoleDefinition> ToRoleDefinitions(IList<RoleOptions> hosts)
-		//{
-		//	return hosts.Select(hostOptions => {
-		//		return new HostDefinition
-		//		{
-		//			Name = hostOptions.Name,
-		//			Type = hostOptions.Type != HostDefinitionType.Undefined ? hostOptions.Type : HostDefinitionType.Undefined,
-		//			UseSecureConnection = hostOptions.UseSecureConnection,
-		//			Language = string.IsNullOrEmpty(hostOptions.Language) ? null : new CultureInfo(hostOptions.Language)
-		//		};
-		//	}).ToList();
-		//}
 	}
 }

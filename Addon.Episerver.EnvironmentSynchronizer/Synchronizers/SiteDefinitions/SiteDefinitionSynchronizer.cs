@@ -1,5 +1,4 @@
 ﻿using Addon.Episerver.EnvironmentSynchronizer.Configuration;
-using EPiServer.Core.Internal;
 using EPiServer.DataAbstraction;
 using EPiServer.Logging;
 using EPiServer.Security;
@@ -9,7 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Security.Policy;
 using System.Text;
 
 namespace Addon.Episerver.EnvironmentSynchronizer.Synchronizers.SiteDefinitions
@@ -169,37 +167,9 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Synchronizers.SiteDefinitions
 						Logger.Information($"Remove AccessControlEntry Everyone AccessLevel.Read for site {siteDefinitionToUpdate.Name}.");
 						resultLog.AppendLine($"Remove AccessControlEntry Everyone AccessLevel.Read for site {siteDefinitionToUpdate.Name}.<br/>");
 					}
-					//else
-					//{
-					//	securityDescriptor.AddEntry(new AccessControlEntry("Everyone", AccessLevel.Read, SecurityEntityType.Role));
-
-					//	Logger.Information($"Set AccessControlEntry Everyone-Read for site {siteDefinitionToUpdate.Name}.");
-					//	resultLog.AppendLine($"Set AccessControlEntry Everyone-Read for site {siteDefinitionToUpdate.Name}.<br/>");
-					//}
-
 					_contentSecurityRepository.Save(siteStartPageContentLink, securityDescriptor, SecuritySaveType.Replace);
 					_contentSecurityRepository.Save(siteStartPageContentLink, securityDescriptor, SecuritySaveType.ReplaceChildPermissions);
-
 				}
-
-
-				//securityDescriptor.Clear();
-
-				//foreach (var role in siteDefinitionsToUpdate.Roles)
-
-				//securityDescriptor.AddEntry(new AccessControlEntry("Administrators", AccessLevel.FullAccess, SecurityEntityType.Role));
-				//securityDescriptor.AddEntry(new AccessControlEntry("WebAdmins", AccessLevel.FullAccess, SecurityEntityType.Role));
-				//securityDescriptor.AddEntry(new AccessControlEntry("WebEditors", AccessLevel.Read | AccessLevel.Create | AccessLevel.Edit | AccessLevel.Delete | AccessLevel.Publish, SecurityEntityType.Role));
-
-				//securityDescriptor.AddEntry(new AccessControlEntry("Administrators", AccessLevel.FullAccess, SecurityEntityType.Role));
-				//securityDescriptor.AddEntry(new AccessControlEntry("WebAdmins", AccessLevel.FullAccess, SecurityEntityType.Role));
-				//securityDescriptor.AddEntry(new AccessControlEntry("WebEditors", AccessLevel.Read | AccessLevel.Create | AccessLevel.Edit | AccessLevel.Delete | AccessLevel.Publish, SecurityEntityType.Role));
-				//securityDescriptor.AddEntry(new AccessControlEntry("Everyone", AccessLevel.Read, SecurityEntityType.Role));
-
-				//}
-				//Logger.Information($"Updated {siteDefinitionToUpdate.Name} to AccessControl Administrators({AccessLevel.FullAccess}.");
-				//resultLog.AppendLine($"Updated {siteDefinitionToUpdate.Name} to AccessControl Administrators({AccessLevel.FullAccess}.<br />");
-
 			}
 		}
     }

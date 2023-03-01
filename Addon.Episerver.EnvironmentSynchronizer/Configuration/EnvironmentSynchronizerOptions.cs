@@ -47,8 +47,6 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 
 		[Required]
         public IList<HostOptions> Hosts { get; set; }
-
-		//public IList<RoleOptions> Roles { get; set; }
 	}
 
     public class HostOptions
@@ -61,11 +59,4 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 
         public string Language { get; set; }
     }
-
-    //public class RoleOptions
-    //{
-    //    public string Name { get; set; }
-
-    //    //public int AccessLevel { get; set; }
-    //}
 }

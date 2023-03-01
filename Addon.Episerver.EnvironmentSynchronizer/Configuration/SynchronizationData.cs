@@ -7,7 +7,6 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Models
 	{
 		public bool RunAsInitializationModule { get; set; }
 		public bool RunInitializationModuleEveryStartup { get; set; }
-		//public List<SiteDefinition> SiteDefinitions { get; set; }
 		public List<EnvironmentSynchronizerSiteDefinition> SiteDefinitions { get; set; }
 		public List<ScheduledJobDefinition> ScheduledJobs { get; set; }
 	}
