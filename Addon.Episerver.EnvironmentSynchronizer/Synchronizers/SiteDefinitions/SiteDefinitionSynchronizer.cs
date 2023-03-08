@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Addon.Episerver.EnvironmentSynchronizer.Synchronizers.SiteDefinitions
@@ -95,7 +96,7 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Synchronizers.SiteDefinitions
                     if (siteDefinitionToUpdate.ForceLogin)
                     {
                         // Will remove Everyone user group access.
-                        SetForceLogin(site, siteDefinitionToUpdate);
+                        RemoveAccessForEveryoneRole(site, siteDefinitionToUpdate);
                     }
 				}
                 else
@@ -126,7 +127,7 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Synchronizers.SiteDefinitions
             return siteDefinition;
         }
 
-        private void SetForceLogin(SiteDefinition site, EnvironmentSynchronizerSiteDefinition siteDefinitionToUpdate)
+        public void RemoveAccessForEveryoneRole(SiteDefinition site, EnvironmentSynchronizerSiteDefinition siteDefinitionToUpdate)
 		{
 			var siteStartPageContentLink = site.StartPage;
 			if (siteStartPageContentLink != null)
@@ -140,14 +141,14 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Synchronizers.SiteDefinitions
 						securityDescriptor.IsInherited = false;
 					}
 
-					var foundEveryoneRead = false;
+					var foundEveryoneRole = false;
 					var existingEntries = new List<AccessControlEntry>();
 					foreach (var entry in securityDescriptor.Entries)
 					{
 						Logger.Information($"Found AccessControlEntry {entry.Name}-{entry.Access} for site {siteDefinitionToUpdate.Name}.");
-						if (entry.Name == "Everyone")
+						if (entry.Name.ToLower() == "everyone")
 						{
-							foundEveryoneRead = true;
+							foundEveryoneRole = true;
 						}
 						else
 						{
@@ -162,7 +163,7 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Synchronizers.SiteDefinitions
 						securityDescriptor.AddEntry(entry);
 					}
 
-					if (foundEveryoneRead)
+					if (foundEveryoneRole)
 					{
 						Logger.Information($"Remove AccessControlEntry Everyone AccessLevel.Read for site {siteDefinitionToUpdate.Name}.");
 						resultLog.AppendLine($"Remove AccessControlEntry Everyone AccessLevel.Read for site {siteDefinitionToUpdate.Name}.<br/>");
