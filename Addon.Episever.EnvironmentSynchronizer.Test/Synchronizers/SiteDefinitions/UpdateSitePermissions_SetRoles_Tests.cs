@@ -8,34 +8,15 @@ using FluentAssertions;
 using Moq;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace Addon.Episever.EnvironmentSynchronizer.Test.Synchronizers.SiteDefinitions
 {
-	public class RemoveAccessForEveryoneRoleTests
+	public class UpdateSitePermissions_SetRoles_Tests
 	{
 		[Fact]
-		public void When_no_startpage_exists_on_sitedefinition_nothing_should_be_done()
-		{
-			// Arrange
-			var mockSiteDefinitionRepository = new Mock<ISiteDefinitionRepository>();
-			var mockContentSecurityRepository = new Mock<IContentSecurityRepository>();
-			var mockConfigurationReader = new Mock<IConfigurationReader>();
-
-			var siteDefinitionSynchronizer = new SiteDefinitionSynchronizer(mockSiteDefinitionRepository.Object, mockContentSecurityRepository.Object, mockConfigurationReader.Object);
-
-			var siteDefintion = new SiteDefinition();
-			var environmentSynchronizerSiteDefinition = new EnvironmentSynchronizerSiteDefinition();
-
-			// Act
-			Action action = () => siteDefinitionSynchronizer.RemoveAccessForEveryoneRole(siteDefintion, environmentSynchronizerSiteDefinition);
-
-			// Assert
-			action.Should().NotThrow<Exception>();
-		}
-
-		[Fact]
-		public void When_no_contentsecuritydescriptor_for_startpage_is_found_nothing_should_be_done()
+		public void When_empty_list_of_setroles_is_found_nothing_should_be_done()
 		{
 			// Arrange
 			var startPageContentReference = new ContentReference(9);
@@ -53,16 +34,19 @@ namespace Addon.Episever.EnvironmentSynchronizer.Test.Synchronizers.SiteDefiniti
 			var siteDefintion = new SiteDefinition();
 			siteDefintion.StartPage = startPageContentReference;
 			var environmentSynchronizerSiteDefinition = new EnvironmentSynchronizerSiteDefinition();
+			environmentSynchronizerSiteDefinition.SetRoles = new List<SetRoleDefinition>();
+			
 
 			// Act
-			Action action = () => siteDefinitionSynchronizer.RemoveAccessForEveryoneRole(siteDefintion, environmentSynchronizerSiteDefinition);
+			Action action = () => siteDefinitionSynchronizer.UpdateSitePermissions(siteDefintion, environmentSynchronizerSiteDefinition);
 
 			// Assert
 			action.Should().NotThrow<Exception>();
+			mockContentSecurityRepository.Verify(d => d.Save(startPageContentReference, contentSecurityDescriptor, SecuritySaveType.Replace), Times.Exactly(0));
 		}
 
 		[Fact]
-		public void When_accesscontrolentrylist_is_empty_nothing_should_be_done()
+		public void When_single_setroles_on_a_empty_existing_accesscontrolentrylist_save_as_new_role()
 		{
 			// Arrange
 			var startPageContentReference = new ContentReference(9);
@@ -84,64 +68,33 @@ namespace Addon.Episever.EnvironmentSynchronizer.Test.Synchronizers.SiteDefiniti
 			var siteDefintion = new SiteDefinition();
 			siteDefintion.StartPage = startPageContentReference;
 			var environmentSynchronizerSiteDefinition = new EnvironmentSynchronizerSiteDefinition();
+			environmentSynchronizerSiteDefinition.ForceLogin = true;
+			environmentSynchronizerSiteDefinition.SetRoles = new List<SetRoleDefinition> {
+				new SetRoleDefinition { Name = "CmsAdmin", Access = AccessLevel.Read }
+			};
 
 			// Act
-			Action action = () => siteDefinitionSynchronizer.RemoveAccessForEveryoneRole(siteDefintion, environmentSynchronizerSiteDefinition);
+			Action action = () => siteDefinitionSynchronizer.UpdateSitePermissions(siteDefintion, environmentSynchronizerSiteDefinition);
 
 			// Assert
 			action.Should().NotThrow<Exception>();
 			mockContentSecurityRepository.Verify(d => d.Save(startPageContentReference, contentSecurityDescriptor, SecuritySaveType.Replace), Times.Exactly(1));
 
 			contentSecurityDescriptor.Should().NotBeNull();
-			contentSecurityDescriptor.Entries.Should().HaveCount(0);
+			contentSecurityDescriptor.Entries.Should().HaveCount(1);
+			var descriptorList = contentSecurityDescriptor.Entries.ToList();
+			descriptorList[0].Name.Should().Be("CmsAdmin");
+			descriptorList[0].Access.Should().Be(AccessLevel.Read);
 		}
 
 		[Fact]
-		public void When_accesscontrolentrylist_contains_only_everyone_it_should_return_an_empty_list()
+		public void When_single_setroles_on_a_existing_accesscontrolentrylist_save_as_update_role()
 		{
 			// Arrange
 			var startPageContentReference = new ContentReference(9);
 
 			var listAce = new List<AccessControlEntry>();
-			listAce.Add(new AccessControlEntry("Everyone", AccessLevel.Read));
-
-			var contentSecurityDescriptor = new FakeContentSecurityDescriptor();
-			contentSecurityDescriptor.Entries = listAce;
-
-			var mockSiteDefinitionRepository = new Mock<ISiteDefinitionRepository>();
-			var mockContentSecurityRepository = new Mock<IContentSecurityRepository>();
-			mockContentSecurityRepository.Setup(x => x.Get(startPageContentReference)).Returns(contentSecurityDescriptor);
-			mockContentSecurityRepository.Setup(x => x.Save(startPageContentReference, contentSecurityDescriptor, SecuritySaveType.Replace)).Verifiable();
-
-			var mockConfigurationReader = new Mock<IConfigurationReader>();
-
-			var siteDefinitionSynchronizer = new SiteDefinitionSynchronizer(mockSiteDefinitionRepository.Object, mockContentSecurityRepository.Object, mockConfigurationReader.Object);
-
-			var siteDefintion = new SiteDefinition();
-			siteDefintion.StartPage = startPageContentReference;
-			var environmentSynchronizerSiteDefinition = new EnvironmentSynchronizerSiteDefinition();
-
-			// Act
-			Action action = () => siteDefinitionSynchronizer.RemoveAccessForEveryoneRole(siteDefintion, environmentSynchronizerSiteDefinition);
-
-			// Assert
-			action.Should().NotThrow<Exception>();
-			mockContentSecurityRepository.Verify(d => d.Save(startPageContentReference, contentSecurityDescriptor, SecuritySaveType.Replace), Times.Exactly(1));
-
-			contentSecurityDescriptor.Should().NotBeNull();
-			contentSecurityDescriptor.Entries.Should().HaveCount(0);
-		}
-
-		[Fact]
-		public void When_Accesscontrolentrylist_contains_everyone_and_2_other_entries_should_remove_everyone()
-		{
-			// Arrange
-			var startPageContentReference = new ContentReference(9);
-
-			var listAce = new List<AccessControlEntry>();
-			listAce.Add(new AccessControlEntry("Everyone", AccessLevel.Read | AccessLevel.Create));
 			listAce.Add(new AccessControlEntry("CmsAdmin", AccessLevel.Read | AccessLevel.Create | AccessLevel.Edit | AccessLevel.Delete | AccessLevel.Administer));
-			listAce.Add(new AccessControlEntry("CmsEdit", AccessLevel.Read | AccessLevel.Create | AccessLevel.Edit | AccessLevel.Delete));
 
 			var contentSecurityDescriptor = new FakeContentSecurityDescriptor();
 			contentSecurityDescriptor.Entries = listAce;
@@ -150,7 +103,6 @@ namespace Addon.Episever.EnvironmentSynchronizer.Test.Synchronizers.SiteDefiniti
 			var mockContentSecurityRepository = new Mock<IContentSecurityRepository>();
 			mockContentSecurityRepository.Setup(x => x.Get(startPageContentReference)).Returns(contentSecurityDescriptor);
 			mockContentSecurityRepository.Setup(x => x.Save(startPageContentReference, contentSecurityDescriptor, SecuritySaveType.Replace)).Verifiable();
-			mockContentSecurityRepository.Setup(x => x.Save(startPageContentReference, contentSecurityDescriptor, SecuritySaveType.ReplaceChildPermissions)).Verifiable();
 
 			var mockConfigurationReader = new Mock<IConfigurationReader>();
 
@@ -159,71 +111,27 @@ namespace Addon.Episever.EnvironmentSynchronizer.Test.Synchronizers.SiteDefiniti
 			var siteDefintion = new SiteDefinition();
 			siteDefintion.StartPage = startPageContentReference;
 			var environmentSynchronizerSiteDefinition = new EnvironmentSynchronizerSiteDefinition();
+			environmentSynchronizerSiteDefinition.ForceLogin = true;
+			environmentSynchronizerSiteDefinition.SetRoles = new List<SetRoleDefinition> {
+				new SetRoleDefinition { Name = "CmsAdmin", Access = AccessLevel.Read }
+			};
 
 			// Act
-			Action action = () => siteDefinitionSynchronizer.RemoveAccessForEveryoneRole(siteDefintion, environmentSynchronizerSiteDefinition);
+			Action action = () => siteDefinitionSynchronizer.UpdateSitePermissions(siteDefintion, environmentSynchronizerSiteDefinition);
 
 			// Assert
 			action.Should().NotThrow<Exception>();
 			mockContentSecurityRepository.Verify(d => d.Save(startPageContentReference, contentSecurityDescriptor, SecuritySaveType.Replace), Times.Exactly(1));
-			mockContentSecurityRepository.Verify(d => d.Save(startPageContentReference, contentSecurityDescriptor, SecuritySaveType.ReplaceChildPermissions), Times.Exactly(1));
 
 			contentSecurityDescriptor.Should().NotBeNull();
-			contentSecurityDescriptor.Entries.Should().HaveCount(2);
-			contentSecurityDescriptor.Entries.Should().NotContain(new AccessControlEntry("Everyone", AccessLevel.Read | AccessLevel.Create));
-			contentSecurityDescriptor.Entries.Should().Contain(new AccessControlEntry("CmsAdmin", AccessLevel.Read | AccessLevel.Create | AccessLevel.Edit | AccessLevel.Delete | AccessLevel.Administer));
-			contentSecurityDescriptor.Entries.Should().Contain(new AccessControlEntry("CmsEdit", AccessLevel.Read | AccessLevel.Create | AccessLevel.Edit | AccessLevel.Delete));
+			contentSecurityDescriptor.Entries.Should().HaveCount(1);
+			var descriptorList = contentSecurityDescriptor.Entries.ToList();
+			descriptorList[0].Name.Should().Be("CmsAdmin");
+			descriptorList[0].Access.Should().Be(AccessLevel.Read);
 		}
 
 		[Fact]
-		public void When_accesscontrolentrylist_contains_everyone_and_4_other_entries_it_should_remove_everyone()
-		{
-			// Arrange
-			var startPageContentReference = new ContentReference(9);
-
-			var listAce = new List<AccessControlEntry>();
-			listAce.Add(new AccessControlEntry("WebsiteAdmin", AccessLevel.Read | AccessLevel.Create | AccessLevel.Edit | AccessLevel.Delete | AccessLevel.Administer));
-			listAce.Add(new AccessControlEntry("WebsiteEdit", AccessLevel.Read | AccessLevel.Create | AccessLevel.Edit | AccessLevel.Delete));
-			listAce.Add(new AccessControlEntry("Everyone", AccessLevel.Read | AccessLevel.Create));
-			listAce.Add(new AccessControlEntry("CmsAdmin", AccessLevel.Read | AccessLevel.Create | AccessLevel.Edit | AccessLevel.Delete | AccessLevel.Administer));
-			listAce.Add(new AccessControlEntry("CmsEdit", AccessLevel.Read | AccessLevel.Create | AccessLevel.Edit | AccessLevel.Delete));
-
-			var contentSecurityDescriptor = new FakeContentSecurityDescriptor();
-			contentSecurityDescriptor.Entries = listAce;
-
-			var mockSiteDefinitionRepository = new Mock<ISiteDefinitionRepository>();
-			var mockContentSecurityRepository = new Mock<IContentSecurityRepository>();
-			mockContentSecurityRepository.Setup(x => x.Get(startPageContentReference)).Returns(contentSecurityDescriptor);
-			mockContentSecurityRepository.Setup(x => x.Save(startPageContentReference, contentSecurityDescriptor, SecuritySaveType.Replace)).Verifiable();
-			mockContentSecurityRepository.Setup(x => x.Save(startPageContentReference, contentSecurityDescriptor, SecuritySaveType.ReplaceChildPermissions)).Verifiable();
-
-			var mockConfigurationReader = new Mock<IConfigurationReader>();
-
-			var siteDefinitionSynchronizer = new SiteDefinitionSynchronizer(mockSiteDefinitionRepository.Object, mockContentSecurityRepository.Object, mockConfigurationReader.Object);
-
-			var siteDefintion = new SiteDefinition();
-			siteDefintion.StartPage = startPageContentReference;
-			var environmentSynchronizerSiteDefinition = new EnvironmentSynchronizerSiteDefinition();
-
-			// Act
-			Action action = () => siteDefinitionSynchronizer.RemoveAccessForEveryoneRole(siteDefintion, environmentSynchronizerSiteDefinition);
-
-			// Assert
-			action.Should().NotThrow<Exception>();
-			mockContentSecurityRepository.Verify(d => d.Save(startPageContentReference, contentSecurityDescriptor, SecuritySaveType.Replace), Times.Exactly(1));
-			mockContentSecurityRepository.Verify(d => d.Save(startPageContentReference, contentSecurityDescriptor, SecuritySaveType.ReplaceChildPermissions), Times.Exactly(1));
-
-			contentSecurityDescriptor.Should().NotBeNull();
-			contentSecurityDescriptor.Entries.Should().HaveCount(4);
-			contentSecurityDescriptor.Entries.Should().NotContain(new AccessControlEntry("Everyone", AccessLevel.Read | AccessLevel.Create));
-			contentSecurityDescriptor.Entries.Should().Contain(new AccessControlEntry("WebsiteAdmin", AccessLevel.Read | AccessLevel.Create | AccessLevel.Edit | AccessLevel.Delete | AccessLevel.Administer));
-			contentSecurityDescriptor.Entries.Should().Contain(new AccessControlEntry("WebsiteEdit", AccessLevel.Read | AccessLevel.Create | AccessLevel.Edit | AccessLevel.Delete));
-			contentSecurityDescriptor.Entries.Should().Contain(new AccessControlEntry("CmsAdmin", AccessLevel.Read | AccessLevel.Create | AccessLevel.Edit | AccessLevel.Delete | AccessLevel.Administer));
-			contentSecurityDescriptor.Entries.Should().Contain(new AccessControlEntry("CmsEdit", AccessLevel.Read | AccessLevel.Create | AccessLevel.Edit | AccessLevel.Delete));
-		}
-
-		[Fact]
-		public void When_accesscontrolentrylist_contains_4_other_entries_it_should_return_a_list_without_everyone()
+		public void When_single_setroles_on_many_existing_accesscontrolentrylist_save_as_update_role()
 		{
 			// Arrange
 			var startPageContentReference = new ContentReference(9);
@@ -241,7 +149,6 @@ namespace Addon.Episever.EnvironmentSynchronizer.Test.Synchronizers.SiteDefiniti
 			var mockContentSecurityRepository = new Mock<IContentSecurityRepository>();
 			mockContentSecurityRepository.Setup(x => x.Get(startPageContentReference)).Returns(contentSecurityDescriptor);
 			mockContentSecurityRepository.Setup(x => x.Save(startPageContentReference, contentSecurityDescriptor, SecuritySaveType.Replace)).Verifiable();
-			mockContentSecurityRepository.Setup(x => x.Save(startPageContentReference, contentSecurityDescriptor, SecuritySaveType.ReplaceChildPermissions)).Verifiable();
 
 			var mockConfigurationReader = new Mock<IConfigurationReader>();
 
@@ -250,21 +157,73 @@ namespace Addon.Episever.EnvironmentSynchronizer.Test.Synchronizers.SiteDefiniti
 			var siteDefintion = new SiteDefinition();
 			siteDefintion.StartPage = startPageContentReference;
 			var environmentSynchronizerSiteDefinition = new EnvironmentSynchronizerSiteDefinition();
+			environmentSynchronizerSiteDefinition.ForceLogin = true;
+			environmentSynchronizerSiteDefinition.SetRoles = new List<SetRoleDefinition> {
+				new SetRoleDefinition { Name = "CmsAdmin", Access = AccessLevel.Read }
+			};
 
 			// Act
-			Action action = () => siteDefinitionSynchronizer.RemoveAccessForEveryoneRole(siteDefintion, environmentSynchronizerSiteDefinition);
+			Action action = () => siteDefinitionSynchronizer.UpdateSitePermissions(siteDefintion, environmentSynchronizerSiteDefinition);
 
 			// Assert
 			action.Should().NotThrow<Exception>();
 			mockContentSecurityRepository.Verify(d => d.Save(startPageContentReference, contentSecurityDescriptor, SecuritySaveType.Replace), Times.Exactly(1));
-			mockContentSecurityRepository.Verify(d => d.Save(startPageContentReference, contentSecurityDescriptor, SecuritySaveType.ReplaceChildPermissions), Times.Exactly(1));
 
 			contentSecurityDescriptor.Should().NotBeNull();
 			contentSecurityDescriptor.Entries.Should().HaveCount(4);
-			contentSecurityDescriptor.Entries.Should().Contain(new AccessControlEntry("WebsiteAdmin", AccessLevel.Read | AccessLevel.Create | AccessLevel.Edit | AccessLevel.Delete | AccessLevel.Administer));
-			contentSecurityDescriptor.Entries.Should().Contain(new AccessControlEntry("WebsiteEdit", AccessLevel.Read | AccessLevel.Create | AccessLevel.Edit | AccessLevel.Delete));
-			contentSecurityDescriptor.Entries.Should().Contain(new AccessControlEntry("CmsAdmin", AccessLevel.Read | AccessLevel.Create | AccessLevel.Edit | AccessLevel.Delete | AccessLevel.Administer));
-			contentSecurityDescriptor.Entries.Should().Contain(new AccessControlEntry("CmsEdit", AccessLevel.Read | AccessLevel.Create | AccessLevel.Edit | AccessLevel.Delete));
+			var descriptorList = contentSecurityDescriptor.Entries.ToList();
+			descriptorList[3].Name.Should().Be("CmsAdmin");
+			descriptorList[3].Access.Should().Be(AccessLevel.Read);
 		}
+
+		[Fact]
+		public void When_two_setroles_on_many_existing_accesscontrolentrylist_save_as_update_role()
+		{
+			// Arrange
+			var startPageContentReference = new ContentReference(9);
+
+			var listAce = new List<AccessControlEntry>();
+			listAce.Add(new AccessControlEntry("WebsiteAdmin", AccessLevel.Read | AccessLevel.Create | AccessLevel.Edit | AccessLevel.Delete | AccessLevel.Administer));
+			listAce.Add(new AccessControlEntry("WebsiteEdit", AccessLevel.Read | AccessLevel.Create | AccessLevel.Edit | AccessLevel.Delete));
+			listAce.Add(new AccessControlEntry("CmsAdmin", AccessLevel.Read | AccessLevel.Create | AccessLevel.Edit | AccessLevel.Delete | AccessLevel.Administer));
+			listAce.Add(new AccessControlEntry("CmsEdit", AccessLevel.Read | AccessLevel.Create | AccessLevel.Edit | AccessLevel.Delete));
+
+			var contentSecurityDescriptor = new FakeContentSecurityDescriptor();
+			contentSecurityDescriptor.Entries = listAce;
+
+			var mockSiteDefinitionRepository = new Mock<ISiteDefinitionRepository>();
+			var mockContentSecurityRepository = new Mock<IContentSecurityRepository>();
+			mockContentSecurityRepository.Setup(x => x.Get(startPageContentReference)).Returns(contentSecurityDescriptor);
+			mockContentSecurityRepository.Setup(x => x.Save(startPageContentReference, contentSecurityDescriptor, SecuritySaveType.Replace)).Verifiable();
+
+			var mockConfigurationReader = new Mock<IConfigurationReader>();
+
+			var siteDefinitionSynchronizer = new SiteDefinitionSynchronizer(mockSiteDefinitionRepository.Object, mockContentSecurityRepository.Object, mockConfigurationReader.Object);
+
+			var siteDefintion = new SiteDefinition();
+			siteDefintion.StartPage = startPageContentReference;
+			var environmentSynchronizerSiteDefinition = new EnvironmentSynchronizerSiteDefinition();
+			environmentSynchronizerSiteDefinition.ForceLogin = true;
+			environmentSynchronizerSiteDefinition.SetRoles = new List<SetRoleDefinition> {
+				new SetRoleDefinition { Name = "CmsAdmin", Access = AccessLevel.Read },
+				new SetRoleDefinition { Name = "CmsEdit", Access = AccessLevel.Read | AccessLevel.Create | AccessLevel.Edit | AccessLevel.Delete }
+			};
+
+			// Act
+			Action action = () => siteDefinitionSynchronizer.UpdateSitePermissions(siteDefintion, environmentSynchronizerSiteDefinition);
+
+			// Assert
+			action.Should().NotThrow<Exception>();
+			mockContentSecurityRepository.Verify(d => d.Save(startPageContentReference, contentSecurityDescriptor, SecuritySaveType.Replace), Times.Exactly(1));
+
+			contentSecurityDescriptor.Should().NotBeNull();
+			contentSecurityDescriptor.Entries.Should().HaveCount(4);
+			var descriptorList = contentSecurityDescriptor.Entries.ToList();
+			descriptorList[2].Name.Should().Be("CmsAdmin");
+			descriptorList[2].Access.Should().Be(AccessLevel.Read);
+			descriptorList[3].Name.Should().Be("CmsEdit");
+			descriptorList[3].Access.Should().Be(AccessLevel.Read | AccessLevel.Create | AccessLevel.Edit | AccessLevel.Delete);
+		}
+
 	}
 }
