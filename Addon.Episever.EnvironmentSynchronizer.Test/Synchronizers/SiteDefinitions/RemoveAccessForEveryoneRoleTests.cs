@@ -13,10 +13,10 @@ using Xunit;
 
 namespace Addon.Episever.EnvironmentSynchronizer.Test.Synchronizers.SiteDefinitions
 {
-	public class SiteDefinitionSynchronizerTests
+	public class RemoveAccessForEveryoneRoleTests
 	{
 		[Fact]
-		public void RemoveAccessForEveryoneRole_NullStartPage_Nothing()
+		public void No_startpage_on_sitedefinition_nothing_can_be_done()
 		{
 			// Arrange
 			var mockSiteDefinitionRepository = new Mock<ISiteDefinitionRepository>();
@@ -36,7 +36,7 @@ namespace Addon.Episever.EnvironmentSynchronizer.Test.Synchronizers.SiteDefiniti
 		}
 
 		[Fact]
-		public void RemoveAccessForEveryoneRole_NullSecirityDescriptor_Nothing()
+		public void No_contentsecuritydescriptor_for_startpage_is_found_nothing_can_be_done()
 		{
 			// Arrange
 			var startPageContentReference = new ContentReference(9);
@@ -63,7 +63,7 @@ namespace Addon.Episever.EnvironmentSynchronizer.Test.Synchronizers.SiteDefiniti
 		}
 
 		[Fact]
-		public void RemoveAccessForEveryoneRole_EmptyAccessControlEntryList_Nothing()
+		public void Empty_accesscontrolentrylist_nothing_can_be_done()
 		{
 			// Arrange
 			var startPageContentReference = new ContentReference(9);
@@ -98,7 +98,7 @@ namespace Addon.Episever.EnvironmentSynchronizer.Test.Synchronizers.SiteDefiniti
 		}
 
 		[Fact]
-		public void RemoveAccessForEveryoneRole_AccessControlEntryListOnlyEveryone_EmptyList()
+		public void Accesscontrolentrylist_contains_only_everyone_will_return_empty_list()
 		{
 			// Arrange
 			var startPageContentReference = new ContentReference(9);
@@ -134,7 +134,7 @@ namespace Addon.Episever.EnvironmentSynchronizer.Test.Synchronizers.SiteDefiniti
 		}
 
 		[Fact]
-		public void RemoveAccessForEveryoneRole_ACEListEveryoneAndOther_NoEveryone()
+		public void Accesscontrolentrylist_contains_everyone_and_2_other_will_return_list_without_everyone()
 		{
 			// Arrange
 			var startPageContentReference = new ContentReference(9);
@@ -177,7 +177,7 @@ namespace Addon.Episever.EnvironmentSynchronizer.Test.Synchronizers.SiteDefiniti
 		}
 
 		[Fact]
-		public void RemoveAccessForEveryoneRole_ACEListEveryoneAndManyOther_NoEveryone()
+		public void Accesscontrolentrylist_contains_everyone_and_4_other_will_return_list_without_everyone()
 		{
 			// Arrange
 			var startPageContentReference = new ContentReference(9);
@@ -224,7 +224,7 @@ namespace Addon.Episever.EnvironmentSynchronizer.Test.Synchronizers.SiteDefiniti
 		}
 
 		[Fact]
-		public void RemoveAccessForEveryoneRole_ACEListNoEveryoneAndManyOther_NoEveryone()
+		public void Accesscontrolentrylist_contains_4_other_will_return_list_without_everyone()
 		{
 			// Arrange
 			var startPageContentReference = new ContentReference(9);
