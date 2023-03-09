@@ -116,8 +116,8 @@ In the example above it loads the setting/configuration value from appsettings.j
   "EnvironmentSettings.Environment": "dev",
 }
 ```
-### DXP variable episerver:EnvironmentName support
-If you don´t implement the logic specified above. The DXP variable ´episerver:EnvironmentName´ will be used. More information about the DXP environments and the appsetting can be found on [https://world.episerver.com/documentation/developer-guides/digital-experience-platform/development-considerations/environment-configurations/](https://world.episerver.com/documentation/developer-guides/digital-experience-platform/development-considerations/environment-configurations/)  
+### DXP variable ASPNETCORE_ENVIRONMENT support
+If you don´t implement the logic specified above. The DXP variable ´ASPNETCORE_ENVIRONMENT´ will be used. More information about the DXP environments and the appsetting can be found on [https://world.episerver.com/documentation/developer-guides/digital-experience-platform/development-considerations/environment-configurations/](https://world.episerver.com/documentation/developer-guides/digital-experience-platform/development-considerations/environment-configurations/)  
 So if you don´t set this variable yourself you will get the following values:  
 1. In your local environment: "" (empty value)
 2. In the integration environment: "Integration"  
