@@ -5,7 +5,6 @@ using EPiServer.DataAbstraction;
 using EPiServer.Security;
 using EPiServer.Web;
 using FluentAssertions;
-using Microsoft.Extensions.Configuration;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -16,7 +15,7 @@ namespace Addon.Episever.EnvironmentSynchronizer.Test.Synchronizers.SiteDefiniti
 	public class RemoveAccessForEveryoneRoleTests
 	{
 		[Fact]
-		public void No_startpage_on_sitedefinition_nothing_can_be_done()
+		public void When_no_startpage_exists_on_sitedefinition_nothing_should_be_done()
 		{
 			// Arrange
 			var mockSiteDefinitionRepository = new Mock<ISiteDefinitionRepository>();
@@ -36,7 +35,7 @@ namespace Addon.Episever.EnvironmentSynchronizer.Test.Synchronizers.SiteDefiniti
 		}
 
 		[Fact]
-		public void No_contentsecuritydescriptor_for_startpage_is_found_nothing_can_be_done()
+		public void When_no_contentsecuritydescriptor_for_startpage_is_found_nothing_should_be_done()
 		{
 			// Arrange
 			var startPageContentReference = new ContentReference(9);
@@ -63,7 +62,7 @@ namespace Addon.Episever.EnvironmentSynchronizer.Test.Synchronizers.SiteDefiniti
 		}
 
 		[Fact]
-		public void Empty_accesscontrolentrylist_nothing_can_be_done()
+		public void When_accesscontrolentrylist_is_empty_nothing_should_be_done()
 		{
 			// Arrange
 			var startPageContentReference = new ContentReference(9);
@@ -98,7 +97,7 @@ namespace Addon.Episever.EnvironmentSynchronizer.Test.Synchronizers.SiteDefiniti
 		}
 
 		[Fact]
-		public void Accesscontrolentrylist_contains_only_everyone_will_return_empty_list()
+		public void When_accesscontrolentrylist_contains_only_everyone_it_should_return_an_empty_list()
 		{
 			// Arrange
 			var startPageContentReference = new ContentReference(9);
@@ -134,7 +133,7 @@ namespace Addon.Episever.EnvironmentSynchronizer.Test.Synchronizers.SiteDefiniti
 		}
 
 		[Fact]
-		public void Accesscontrolentrylist_contains_everyone_and_2_other_will_return_list_without_everyone()
+		public void When_Accesscontrolentrylist_contains_everyone_and_2_other_entries_should_remove_everyone()
 		{
 			// Arrange
 			var startPageContentReference = new ContentReference(9);
@@ -177,7 +176,7 @@ namespace Addon.Episever.EnvironmentSynchronizer.Test.Synchronizers.SiteDefiniti
 		}
 
 		[Fact]
-		public void Accesscontrolentrylist_contains_everyone_and_4_other_will_return_list_without_everyone()
+		public void When_accesscontrolentrylist_contains_everyone_and_4_other_entries_it_should_remove_everyone()
 		{
 			// Arrange
 			var startPageContentReference = new ContentReference(9);
@@ -224,7 +223,7 @@ namespace Addon.Episever.EnvironmentSynchronizer.Test.Synchronizers.SiteDefiniti
 		}
 
 		[Fact]
-		public void Accesscontrolentrylist_contains_4_other_will_return_list_without_everyone()
+		public void When_accesscontrolentrylist_contains_4_other_entries_it_should_return_a_list_without_everyone()
 		{
 			// Arrange
 			var startPageContentReference = new ContentReference(9);
