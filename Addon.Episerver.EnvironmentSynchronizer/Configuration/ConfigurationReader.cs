@@ -1,4 +1,4 @@
-﻿using Addon.Episerver.EnvironmentSynchronizer.Models;
+using Addon.Episerver.EnvironmentSynchronizer.Models;
 using EPiServer.Logging;
 using EPiServer.Web;
 using System;
@@ -40,7 +40,14 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 					syncData.SiteDefinitions = new List<EnvironmentSynchronizerSiteDefinition>();
 					foreach (var options in _configuration.SiteDefinitions)
 					{
-						var siteDefinition = CreateEnvironmentSynchronizerSiteDefinition(options);
+						var siteDefinition = new EnvironmentSynchronizerSiteDefinition()
+						{
+							Id = string.IsNullOrEmpty(options.Id) ? Guid.Empty : new Guid(options.Id),
+							Name = string.IsNullOrEmpty(options.Name) ? string.Empty : options.Name,
+							SiteUrl = string.IsNullOrEmpty(options.SiteUrl) ? null : new Uri(options.SiteUrl),
+							Hosts = ToHostDefinitions(options.Hosts),
+							ForceLogin = options.ForceLogin
+						};
 						if (!string.IsNullOrEmpty(siteDefinition.Name) && siteDefinition.SiteUrl != null)
 						{
 							syncData.SiteDefinitions.Add(siteDefinition);

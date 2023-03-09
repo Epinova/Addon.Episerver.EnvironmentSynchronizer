@@ -1,4 +1,4 @@
-﻿using Addon.Episerver.EnvironmentSynchronizer.Configuration;
+using Addon.Episerver.EnvironmentSynchronizer.Configuration;
 using EPiServer.DataAbstraction;
 using EPiServer.Logging;
 using EPiServer.Security;
@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Addon.Episerver.EnvironmentSynchronizer.Synchronizers.SiteDefinitions

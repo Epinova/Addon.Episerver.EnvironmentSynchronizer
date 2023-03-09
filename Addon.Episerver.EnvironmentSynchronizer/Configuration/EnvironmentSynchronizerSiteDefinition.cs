@@ -1,4 +1,4 @@
-﻿using EPiServer.Security;
+using EPiServer.Security;
 using EPiServer.Web;
 using System.Collections.Generic;
 
