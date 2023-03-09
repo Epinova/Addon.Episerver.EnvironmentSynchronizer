@@ -1,11 +1,14 @@
 ﻿using Addon.Episerver.EnvironmentSynchronizer.Configuration;
+using EPiServer.DataAbstraction;
 using EPiServer.Logging;
+using EPiServer.Security;
 using EPiServer.ServiceLocation;
 using EPiServer.Web;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Addon.Episerver.EnvironmentSynchronizer.Synchronizers.SiteDefinitions
@@ -15,20 +18,27 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Synchronizers.SiteDefinitions
     {
         private static readonly ILogger Logger = LogManager.GetLogger();
         private readonly ISiteDefinitionRepository _siteDefinitionRepository;
-        private readonly IConfigurationReader _configurationReader;
+		private readonly IContentSecurityRepository _contentSecurityRepository;
+		private readonly IConfigurationReader _configurationReader;
         private StringBuilder resultLog = new StringBuilder();
+        private string _environmentName = string.Empty;
 
-        public SiteDefinitionSynchronizer(
+
+		public SiteDefinitionSynchronizer(
             ISiteDefinitionRepository siteDefinitionRepository,
+            IContentSecurityRepository contentSecurityRepository,
             IConfigurationReader configurationReader)
         {
 	        Logger.Information("SiteDefinitionSynchronizer initialized.");
             _siteDefinitionRepository = siteDefinitionRepository;
+            _contentSecurityRepository = contentSecurityRepository;
             _configurationReader = configurationReader;
         }
 
         public string Synchronize(string environmentName)
         {
+            _environmentName = environmentName;
+
             var syncConfiguration = _configurationReader.ReadConfiguration();
 
             if (syncConfiguration.SiteDefinitions == null || !syncConfiguration.SiteDefinitions.Any())
@@ -59,7 +69,7 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Synchronizers.SiteDefinitions
             return resultLog.ToString();
         }
 
-        private int MergeSiteDefinitions(IEnumerable<SiteDefinition> siteDefinitionsToUpdate)
+        private int MergeSiteDefinitions(IEnumerable<EnvironmentSynchronizerSiteDefinition> siteDefinitionsToUpdate)
         {
             var updatedSites = 0;
             var existingSites = _siteDefinitionRepository.List();
@@ -82,7 +92,13 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Synchronizers.SiteDefinitions
                     updatedSites++;
                     Logger.Information($"Updated {siteDefinitionToUpdate.Name} to site URL {siteDefinitionToUpdate.SiteUrl} and {siteDefinitionToUpdate.Hosts.Count} hostnames.");
                     resultLog.AppendLine($"Updated {siteDefinitionToUpdate.Name} to site URL {siteDefinitionToUpdate.SiteUrl} and {siteDefinitionToUpdate.Hosts.Count} hostnames.<br />");
-                }
+
+                    if (siteDefinitionToUpdate.ForceLogin)
+                    {
+                        // Will remove Everyone user group access.
+                        RemoveAccessForEveryoneRole(site, siteDefinitionToUpdate);
+                    }
+				}
                 else
                 {
                     Logger.Warning($"Could not find site {siteDefinitionToUpdate.Name} or site already has site URL {siteDefinitionToUpdate.SiteUrl}.");
@@ -110,5 +126,52 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Synchronizers.SiteDefinitions
 
             return siteDefinition;
         }
+
+        public void RemoveAccessForEveryoneRole(SiteDefinition site, EnvironmentSynchronizerSiteDefinition siteDefinitionToUpdate)
+		{
+			var siteStartPageContentLink = site.StartPage;
+			if (siteStartPageContentLink != null)
+			{
+				IContentSecurityDescriptor securityDescriptor = (IContentSecurityDescriptor)_contentSecurityRepository.Get(siteStartPageContentLink).CreateWritableClone();
+
+                if (securityDescriptor != null)
+                {
+					if (securityDescriptor.IsInherited)
+					{
+						securityDescriptor.IsInherited = false;
+					}
+
+					var foundEveryoneRole = false;
+					var existingEntries = new List<AccessControlEntry>();
+					foreach (var entry in securityDescriptor.Entries)
+					{
+						Logger.Information($"Found AccessControlEntry {entry.Name}-{entry.Access} for site {siteDefinitionToUpdate.Name}.");
+						if (entry.Name.ToLower() == "everyone")
+						{
+							foundEveryoneRole = true;
+						}
+						else
+						{
+							existingEntries.Add(entry);
+						}
+					}
+
+					securityDescriptor.Clear();
+
+					foreach (var entry in existingEntries)
+					{
+						securityDescriptor.AddEntry(entry);
+					}
+
+					if (foundEveryoneRole)
+					{
+						Logger.Information($"Remove AccessControlEntry Everyone AccessLevel.Read for site {siteDefinitionToUpdate.Name}.");
+						resultLog.AppendLine($"Remove AccessControlEntry Everyone AccessLevel.Read for site {siteDefinitionToUpdate.Name}.<br/>");
+					}
+					_contentSecurityRepository.Save(siteStartPageContentLink, securityDescriptor, SecuritySaveType.Replace);
+					_contentSecurityRepository.Save(siteStartPageContentLink, securityDescriptor, SecuritySaveType.ReplaceChildPermissions);
+				}
+			}
+		}
     }
 }

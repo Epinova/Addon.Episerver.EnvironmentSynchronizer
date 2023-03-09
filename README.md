@@ -18,6 +18,7 @@ Example .json
       {
         "name": "CustomerX",
         "SiteUrl": "https://custxmstr972znb5prep.azurewebsites.net/",
+        "ForceLogin": true,
         "Hosts": [
           {
             "Name": "*",
@@ -27,6 +28,12 @@ Example .json
             "Name": "custxmstr972znb5prep-slot.azurewebsites.net",
             "UseSecureConnection": true,
             "Language": "en"
+          },
+          {
+            "Name": "custxmstr972znb5prep.azurewebsites.net",
+            "UseSecureConnection": true,
+            "Language": "en",
+            "Type": "Primary"
           }
         ]
       }
@@ -110,6 +117,31 @@ namespace Yoursite.Infrastructure.Environments
     }
 }
 ```
+In the example above it loads the setting/configuration value from the environment variables in DXP or IIS.  
+```csharp
+using Addon.Episerver.EnvironmentSynchronizer;
+using EPiServer.ServiceLocation;
+using Microsoft.Extensions.Configuration;
+
+namespace Yoursite.Infrastructure.Environments
+{
+   [ServiceConfiguration(typeof(IEnvironmentNameSource))]
+    public class EnvironmentNameSource : IEnvironmentNameSource
+    {
+        private readonly IConfiguration Configuration;
+
+        public EnvironmentNameSource(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        public string GetCurrentEnvironmentName()
+        {
+            return Configuration["EnvironmentSettings.Environment"];
+        }
+    }
+}
+```
 In the example above it loads the setting/configuration value from appsettings.json with the name "EnvironmentSettings.Environment".  
 ```json
 {
@@ -134,7 +166,8 @@ This function is implemented for these projects that don´t want the payload of 
 ### sitedefinition
 **Id** is the GUID that identify the site. If this is provided it will ignore the "Name" attribute.  
 **Name** is the name of the sitedefinition that will be updated. If **Id** is not specified it will match the existing SiteDefinition in the Episerver CMS against this name.  
-**SiteUrl*** is the SiteUrl that this site should have/use.  
+**SiteUrl*** is the SiteUrl that this site should have/use.
+[**ForceLogin***](/Documentation/ForceLogin.md) will remove 'Everyone' AccessLevel.Read if it is found for the site.
 
 ### hosts
 You need to specify all the hosts that the site needs. When the synchronizer is updating a SiteDefinition it will expect that you have specified all hostnames. So of you in Episerver CMS has a extra host that is not specified in the web.config it will be removed.
