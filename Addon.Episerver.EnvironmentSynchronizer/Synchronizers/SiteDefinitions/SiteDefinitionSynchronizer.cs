@@ -8,7 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Addon.Episerver.EnvironmentSynchronizer.Synchronizers.SiteDefinitions
@@ -111,11 +110,11 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Synchronizers.SiteDefinitions
 
 		}
 
-		private void UpdateSitePermissions(SiteDefinition site, EnvironmentSynchronizerSiteDefinition siteDefinitionToUpdate)
+		public void UpdateSitePermissions(SiteDefinition site, EnvironmentSynchronizerSiteDefinition siteDefinitionToUpdate)
 		{
 			var siteStartPageContentLink = site.StartPage;
 
-			if (siteDefinitionToUpdate.ForceLogin || siteDefinitionToUpdate.SetRoles.Any() || siteDefinitionToUpdate.RemoveRoles.Any() && siteStartPageContentLink != null)
+			if (siteDefinitionToUpdate.ForceLogin || (siteDefinitionToUpdate.SetRoles != null && siteDefinitionToUpdate.SetRoles.Any()) || (siteDefinitionToUpdate.RemoveRoles != null && siteDefinitionToUpdate.RemoveRoles.Any()) && siteStartPageContentLink != null)
 			{
 				IContentSecurityDescriptor securityDescriptor = (IContentSecurityDescriptor)_contentSecurityRepository.Get(siteStartPageContentLink).CreateWritableClone();
 
@@ -128,12 +127,12 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Synchronizers.SiteDefinitions
 
 					var existingEntries = ExisitngAce(securityDescriptor);
 
-					if (siteDefinitionToUpdate.SetRoles.Any())
+					if (siteDefinitionToUpdate.SetRoles != null && siteDefinitionToUpdate.SetRoles.Any())
 					{
 						SetRoles(existingEntries, siteDefinitionToUpdate);
 					}
 
-					if (siteDefinitionToUpdate.RemoveRoles.Any())
+					if (siteDefinitionToUpdate.RemoveRoles != null && siteDefinitionToUpdate.RemoveRoles.Any())
 					{
 						RemoveRoles(existingEntries, siteDefinitionToUpdate);
 					}
