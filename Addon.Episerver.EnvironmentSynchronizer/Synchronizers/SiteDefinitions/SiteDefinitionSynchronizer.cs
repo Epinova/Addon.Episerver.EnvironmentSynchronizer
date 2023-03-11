@@ -112,6 +112,7 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Synchronizers.SiteDefinitions
 
 		public void UpdateSitePermissions(SiteDefinition site, EnvironmentSynchronizerSiteDefinition siteDefinitionToUpdate)
 		{
+			Logger.Debug($"UpdateSitePermissions");
 			var siteStartPageContentLink = site.StartPage;
 
 			if (siteDefinitionToUpdate.ForceLogin || (siteDefinitionToUpdate.SetRoles != null && siteDefinitionToUpdate.SetRoles.Any()) || (siteDefinitionToUpdate.RemoveRoles != null && siteDefinitionToUpdate.RemoveRoles.Any()) && siteStartPageContentLink != null)
@@ -139,6 +140,7 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Synchronizers.SiteDefinitions
 
 					if (siteDefinitionToUpdate.ForceLogin)
 					{
+						Logger.Debug($"Start ForceLogin.");
 						RemoveRole(existingEntries, new RemoveRoleDefinition { Name = "Everyone" } , siteDefinitionToUpdate.Name);
 					}
 
@@ -151,7 +153,6 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Synchronizers.SiteDefinitions
 					Logger.Error($"Could not get a security descriptor from site {site.Name} startpage.");
 				}
 			}
-
 		}
 
 		private SiteDefinition GetExistingSiteDefinition(IEnumerable<SiteDefinition> existingSites, SiteDefinition siteDefinitionToUpdate)
@@ -188,14 +189,17 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Synchronizers.SiteDefinitions
 
 		private void SetRoles(List<AccessControlEntry> existingEntries, EnvironmentSynchronizerSiteDefinition siteDefinitionToUpdate)
 		{
+			Logger.Debug($"Start SetRoles.");
 			foreach (var role in siteDefinitionToUpdate.SetRoles)
 			{
 				var existingRole = existingEntries.Where(x => x.Name == role.Name).FirstOrDefault();
 				if (existingRole != null)
 				{
 					existingEntries.Remove(existingRole);
+					Logger.Debug($"RemoveRole {existingRole.Name}.");
 				}
 				existingEntries.Add(new AccessControlEntry(role.Name, role.Access, SecurityEntityType.Role));
+				Logger.Debug($"SetRole {role.Name} {role.Access}.");
 				Logger.Information($"Set AccessControlEntry {role.Name} AccessLevel.{role.Access} for site {siteDefinitionToUpdate.Name}.");
 				resultLog.AppendLine($"Set AccessControlEntry {role.Name} AccessLevel.{role.Access} for site {siteDefinitionToUpdate.Name}.<br/>");
 			}
@@ -203,6 +207,7 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Synchronizers.SiteDefinitions
 
 		private void RemoveRoles(List<AccessControlEntry> existingEntries, EnvironmentSynchronizerSiteDefinition siteDefinitionToUpdate)
 		{
+			Logger.Debug($"Start RemoveRoles.");
 			foreach (var role in siteDefinitionToUpdate.RemoveRoles)
 			{
 				RemoveRole(existingEntries, role, siteDefinitionToUpdate.Name);
@@ -214,6 +219,7 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Synchronizers.SiteDefinitions
 			if (existingRole != null)
 			{
 				existingEntries.Remove(existingRole);
+				Logger.Debug($"RemoveRole {existingRole.Name}.");
 				Logger.Information($"Remove AccessControlEntry {removeRoleDefinition.Name} AccessLevel.{existingRole.Access} for site {siteName}.");
 				resultLog.AppendLine($"Remove AccessControlEntry {removeRoleDefinition.Name} AccessLevel.{existingRole.Access} for site {siteName}.<br/>");
 			}
