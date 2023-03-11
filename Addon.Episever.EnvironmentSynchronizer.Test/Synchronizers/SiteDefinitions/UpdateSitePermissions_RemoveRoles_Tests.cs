@@ -220,7 +220,6 @@ namespace Addon.Episever.EnvironmentSynchronizer.Test.Synchronizers.SiteDefiniti
 			descriptorList[1].Name.Should().NotBe("CmsEdit");
 		}
 
-
 		[Fact]
 		public void When_forcelogin_two_setroles_two_removeroles_on_many_existing_accesscontrolentrylist_save_three_less_roles()
 		{
