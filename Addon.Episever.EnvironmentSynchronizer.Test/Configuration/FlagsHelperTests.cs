@@ -11,7 +11,7 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration.Tests
 	{
 
 		[Fact]
-		public void AccessSringListToAccessLevel_Empty_Test()
+		public void AccessStringListToAccessLevel_Empty_Test()
 		{
 			// Arrange
 			IList listOfValues = new List<string>();
