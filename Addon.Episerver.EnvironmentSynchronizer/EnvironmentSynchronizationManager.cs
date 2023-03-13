@@ -53,10 +53,13 @@ namespace Addon.Episerver.EnvironmentSynchronizer
 	            resultLog.AppendLine($"No synchronizers found.<br />");
             }
 
-            foreach (var environmentSynchronizer in _environmentSynchronizers)
+			Logger.Information($"--------------------------------------------");
+			foreach (var environmentSynchronizer in _environmentSynchronizers)
             {
-	            resultLog.AppendLine(environmentSynchronizer.Synchronize(environmentName) + "<br />");
-            }
+				Logger.Information($"Synchronize {environmentSynchronizer.GetType()}.");
+				resultLog.AppendLine(environmentSynchronizer.Synchronize(environmentName) + "<br />");
+				Logger.Information($"--------------------------------------------");
+			}
 
             Logger.Information($"Finished environment synchronization for environment named: {environmentName}");
 

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using EPiServer.Web;
 
@@ -47,6 +47,10 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 
 		[Required]
         public IList<HostOptions> Hosts { get; set; }
+
+		public IList<SetRoleOptions> SetRoles { get; set; }
+
+		public IList<string> RemoveRoles { get; set; }
 	}
 
     public class HostOptions
@@ -58,5 +62,12 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
         public HostDefinitionType Type { get; set; }
 
         public string Language { get; set; }
+    }
+
+    public class SetRoleOptions
+    {
+        public string Name { get; set; }
+
+        public IList<string> Access { get; set; }
     }
 }

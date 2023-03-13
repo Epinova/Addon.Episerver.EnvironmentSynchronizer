@@ -19,20 +19,6 @@
         "Id": "af4fdb8a-de6a-40de-a37b-e89c4e974231",
         "Name": "sitename",
         "SiteUrl": "https://www.site.se/",
-        "Roles": [
-          {
-            "Name": "Administrators",
-            "AccessLevel": 63
-          },
-          {
-            "Name": "WebAdmins",
-            "AccessLevel": 63
-          },
-          {
-            "Name": "WebEditors",
-            "AccessLevel": 31
-          }
-        ],
         "Hosts": [
           {
             "Name": "*",
@@ -107,6 +93,26 @@
             "Language": "da",
             "Type": "Primary"
           }
+        ],
+        "SetRoles": [
+          {
+            "Name": "WebAdmins",
+            "Access": [
+              "FullAccess"
+            ]
+          },
+          {
+            "Name": "WebEditors",
+            "Access": [
+              "Read",
+              "Create",
+              "Change"
+            ]
+          }
+        ],
+        "RemoveRoles": [
+          "Everyone",
+          "TESTER"
         ]
       }
     ]

@@ -1,4 +1,4 @@
-﻿{
+{
   "EnvironmentSynchronizer": {
     "RunAsInitializationModule": true,
     "RunInitializationModuleEveryStartup": false,
@@ -19,7 +19,7 @@
         "Id": "6AAEAF2F-20F9-41EB-8260-D0BBA76DB141",
         "Name": "CustomerX",
         "SiteUrl": "https://custxmstr972znb5prep.azurewebsites.net/",
-        "ForceLogin": true,
+        "ForceLogin":  true,
         "Hosts": [
           {
             "Name": "*",
@@ -31,7 +31,26 @@
             "UseSecureConnection": true,
             "Language": "en"
           }
-
+        ],
+        "SetRoles": [
+          {
+            "Name": "WebAdmins",
+            "Access": [
+              "FullAccess"
+            ]
+          },
+          {
+            "Name": "WebEditors",
+            "Access": [
+              "Read",
+              "Create",
+              "Change"
+            ]
+          }
+        ],
+        "RemoveRoles": [
+          "Everyone",
+          "TESTER"
         ]
       }
     ]

@@ -1,8 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <Deterministic>false</Deterministic>
 	<TargetFrameworks>net6.0;net7.0</TargetFrameworks>
+	  <Version>1.2.3.0</Version>
 	<IsPackable>true</IsPackable>
 	<DebugType>embedded</DebugType>
 	<Title>Epinova - Environment Synchronizer</Title>
@@ -23,6 +24,6 @@
 		<PackageReference Include="EPiServer.CMS.AspNetCore" Version="12.11.0" />
 	</ItemGroup>
 	<ItemGroup>
-		<InternalsVisibleTo Include="Addon.Episerver.EnvironmentSynchronizer.Test"/>
+		<InternalsVisibleTo Include="Addon.Episerver.EnvironmentSynchronizer.Test" />
 	</ItemGroup>
 </Project>
