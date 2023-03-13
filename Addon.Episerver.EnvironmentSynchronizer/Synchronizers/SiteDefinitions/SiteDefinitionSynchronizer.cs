@@ -78,7 +78,7 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Synchronizers.SiteDefinitions
 	            SiteDefinition site = GetExistingSiteDefinition(existingSites, siteDefinitionToUpdate);
                 if (site != null)
                 {
-					UpdateSiteDefinistionValues(site, siteDefinitionToUpdate);
+					UpdateSiteDefinitionValues(site, siteDefinitionToUpdate);
 					updatedSites++;
 
 					UpdateSitePermissions(site, siteDefinitionToUpdate);
@@ -93,7 +93,7 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Synchronizers.SiteDefinitions
             return updatedSites;
         }
 
-        private void UpdateSiteDefinistionValues(SiteDefinition site, EnvironmentSynchronizerSiteDefinition siteDefinitionToUpdate)
+        private void UpdateSiteDefinitionValues(SiteDefinition site, EnvironmentSynchronizerSiteDefinition siteDefinitionToUpdate)
         {
 			site = site.CreateWritableClone();
 			if (!string.IsNullOrEmpty(siteDefinitionToUpdate.Name) && site.Name != siteDefinitionToUpdate.Name)
@@ -126,7 +126,7 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Synchronizers.SiteDefinitions
 						securityDescriptor.IsInherited = false;
 					}
 
-					var existingEntries = ExisitngAce(securityDescriptor);
+					var existingEntries = GetExistingAce(securityDescriptor);
 
 					if (siteDefinitionToUpdate.SetRoles != null && siteDefinitionToUpdate.SetRoles.Any())
 					{
@@ -173,7 +173,7 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Synchronizers.SiteDefinitions
             return siteDefinition;
         }
 
-		private List<AccessControlEntry> ExisitngAce(IContentSecurityDescriptor securityDescriptor)
+		private List<AccessControlEntry> GetExistingAce(IContentSecurityDescriptor securityDescriptor)
 		{
 			return securityDescriptor.Entries.Select(x => x).ToList();
 		}
