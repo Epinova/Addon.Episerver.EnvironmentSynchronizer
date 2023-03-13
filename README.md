@@ -75,7 +75,7 @@ namespace [Yournamespace]
 ```
 
 ## Adding custom handlers
-You can add custom handlers by creating and registering a class that implements IEnvironmentSynchronizer
+You can add custom handlers by creating and registering a class that implements IEnvironmentSynchronizer. 
 ```csharp
 using Addon.Episerver.EnvironmentSynchronizer;
 using EPiServer.ServiceLocation;
@@ -90,6 +90,30 @@ namespace Yoursite.Infrastructure.Environments
             //TODO: Do something
         }
     }
+}
+```
+You can return result log from the "Synchronize" method. Example below is a Environment Synchronizer that should remove GDPR data in alla enviroments except production environment.
+```csharp
+using Addon.Episerver.EnvironmentSynchronizer;
+using EPiServer.ServiceLocation;
+using System.Text;
+
+namespace Yoursite.Infrastructure.Environments
+{
+	[ServiceConfiguration(typeof(IEnvironmentSynchronizer))]
+	public class GdprEnvironmentSynchronizer : IEnvironmentSynchronizer
+	{
+		private StringBuilder resultLog = new StringBuilder();
+		public string Synchronize(string environmentName)
+		{
+			if (!EnvironmentHelper.IsProductionEnvironment(environmentName))
+			{
+				//Add logic to delete/handle GDPR data from application.
+				resultLog.AppendLine("Removed GDPR data");
+			}
+			return resultLog.ToString();
+		}
+	}
 }
 ```
 
