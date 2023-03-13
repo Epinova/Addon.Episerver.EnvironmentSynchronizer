@@ -93,6 +93,26 @@
             "Language": "da",
             "Type": "Primary"
           }
+        ],
+        "SetRoles": [
+          {
+            "Name": "WebAdmins",
+            "Access": [
+              "FullAccess"
+            ]
+          },
+          {
+            "Name": "WebEditors",
+            "Access": [
+              "Read",
+              "Create",
+              "Change"
+            ]
+          }
+        ],
+        "RemoveRoles": [
+          "Everyone",
+          "TESTER"
         ]
       }
     ]

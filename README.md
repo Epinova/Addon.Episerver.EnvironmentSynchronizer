@@ -18,6 +18,7 @@ Example .json
       {
         "name": "CustomerX",
         "SiteUrl": "https://custxmstr972znb5prep.azurewebsites.net/",
+        "ForceLogin": true,
         "Hosts": [
           {
             "Name": "*",
@@ -27,8 +28,16 @@ Example .json
             "Name": "custxmstr972znb5prep-slot.azurewebsites.net",
             "UseSecureConnection": true,
             "Language": "en"
+          },
+          {
+            "Name": "custxmstr972znb5prep.azurewebsites.net",
+            "UseSecureConnection": true,
+            "Language": "en",
+            "Type": "Primary"
           }
-        ]
+        ],
+        "SetRoles": [],
+        "RemoveRoles": []
       }
     ],
     "ScheduledJobs": [
@@ -66,7 +75,7 @@ namespace [Yournamespace]
 ```
 
 ## Adding custom handlers
-You can add custom handlers by creating and registering a class that implements IEnvironmentSynchronizer
+You can add custom handlers by creating and registering a class that implements IEnvironmentSynchronizer. 
 ```csharp
 using Addon.Episerver.EnvironmentSynchronizer;
 using EPiServer.ServiceLocation;
@@ -81,6 +90,30 @@ namespace Yoursite.Infrastructure.Environments
             //TODO: Do something
         }
     }
+}
+```
+You can return result log from the "Synchronize" method. Example below is a Environment Synchronizer that should remove GDPR data in alla enviroments except production environment.
+```csharp
+using Addon.Episerver.EnvironmentSynchronizer;
+using EPiServer.ServiceLocation;
+using System.Text;
+
+namespace Yoursite.Infrastructure.Environments
+{
+	[ServiceConfiguration(typeof(IEnvironmentSynchronizer))]
+	public class GdprEnvironmentSynchronizer : IEnvironmentSynchronizer
+	{
+		private StringBuilder resultLog = new StringBuilder();
+		public string Synchronize(string environmentName)
+		{
+			if (!EnvironmentHelper.IsProductionEnvironment(environmentName))
+			{
+				//Add logic to delete/handle GDPR data from application.
+				resultLog.AppendLine("Removed GDPR data");
+			}
+			return resultLog.ToString();
+		}
+	}
 }
 ```
 
@@ -110,6 +143,31 @@ namespace Yoursite.Infrastructure.Environments
     }
 }
 ```
+In the example above it loads the setting/configuration value from the environment variables in DXP or IIS.  
+```csharp
+using Addon.Episerver.EnvironmentSynchronizer;
+using EPiServer.ServiceLocation;
+using Microsoft.Extensions.Configuration;
+
+namespace Yoursite.Infrastructure.Environments
+{
+   [ServiceConfiguration(typeof(IEnvironmentNameSource))]
+    public class EnvironmentNameSource : IEnvironmentNameSource
+    {
+        private readonly IConfiguration Configuration;
+
+        public EnvironmentNameSource(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        public string GetCurrentEnvironmentName()
+        {
+            return Configuration["EnvironmentSettings.Environment"];
+        }
+    }
+}
+```
 In the example above it loads the setting/configuration value from appsettings.json with the name "EnvironmentSettings.Environment".  
 ```json
 {
@@ -134,7 +192,8 @@ This function is implemented for these projects that don´t want the payload of 
 ### sitedefinition
 **Id** is the GUID that identify the site. If this is provided it will ignore the "Name" attribute.  
 **Name** is the name of the sitedefinition that will be updated. If **Id** is not specified it will match the existing SiteDefinition in the Episerver CMS against this name.  
-**SiteUrl*** is the SiteUrl that this site should have/use.  
+**SiteUrl*** is the SiteUrl that this site should have/use.
+[**ForceLogin***](/Documentation/ForceLogin.md) will remove 'Everyone' AccessLevel.Read if it is found for the site.
 
 ### hosts
 You need to specify all the hosts that the site needs. When the synchronizer is updating a SiteDefinition it will expect that you have specified all hostnames. So of you in Episerver CMS has a extra host that is not specified in the web.config it will be removed.
@@ -150,6 +209,71 @@ Options (`EPiServer.Web.HostDefinitionType [Enum]`):
 - **RedirectPermanent**
 - **RedirectTemporary**
 **Language** is the CultureInfo that is related to the hostname  
+
+### SetRoles
+Can contain a list of roles that will be added/updated. If not exist in existing list it will be added. If it exist, the AccessLevel will be updated with the 
+access level you specified in the configuration. Note: The permission will be set on startpage of the site and all childpages.  
+```json
+"EnvironmentSynchronizerOptions": {
+    ...
+    "SiteDefinitions": [
+      {
+        ...
+        "SetRoles": [
+            {
+                "Name": "CmsAdmins",
+                "Access": [
+                    "FullAccess"
+                ]
+            },
+            {
+                "Name": "CmsEditors",
+                "Access": [
+                    "Read",
+                    "Create",
+                    "Edit",
+                    "Delete",
+                    "Publish"
+                ]
+            }
+        ],
+        ...
+      }
+    ]
+    ...
+  }
+```
+**Name** is the name of the role. Example CmsEditors  
+**Access** is the AccessLevel that should be set for the role. It is the enum EPiServer.Security.AccessLevel that are used by Episerver CMS. If the Access is not specified it will be set to `NoAccess`.  
+Options (`EPiServer.Security.AccessLevel [Enum]`):  
+- **NoAccess** No access to an item
+- **Read** Read access to an item
+- **Create** Create access for an item, i e create new items below this item
+- **Edit** Change / create new versions of this item
+- **Delete** Delete this item
+- **Publish** Publish/unpublish items and versions of an item
+- **Administer** Set access rights for an item
+- **FullAccess** Full access for an item
+
+### RemoveRoles
+Can contain a list of roles that will be removed. If role exist, the role will be removed from the site (No access). Note: The permission will be set on startpage of the site and all childpages.  
+```json
+"EnvironmentSynchronizerOptions": {
+    ...
+    "SiteDefinitions": [
+      {
+        ...
+        "RemoveRoles": [
+            "CmsAdmins",
+            "Everyone"
+        ],
+        ...
+      }
+    ]
+    ...
+  }
+```
+**Name** is the name of the role. Example CmsEditors  
 
 ## scheduledjobs
 You can specify 0 to many Scheduledjob that should be updated.
