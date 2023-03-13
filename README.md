@@ -64,7 +64,9 @@ namespace [Yournamespace]
 		public void ConfigureServices(IServiceCollection services)
 		{
             ...
-            services.AddCms()... // Add somewhere after AddCms()...
+            services.AddCms()
+            ... 
+            // Add somewhere after AddCms()...
 			...
 			services.AddEnvironmentSynchronization();
 			...
@@ -182,6 +184,8 @@ So if you don´t set this variable yourself you will get the following values:
 3. In the preproduction environment: "Preproduction"  
 4. In the production environment: "Production"  
 
+## Configuration description
+
 ### runAsInitializationModule
 Tells the synchronizer that you want to run it as an InitializationModule.
 
@@ -280,8 +284,9 @@ You can specify 0 to many Scheduledjob that should be updated.
 
 ### schedulejob
 **Id**: If Id is specified then the synchronizer will ignore the Name and find the scheduled job that match the Id.   
-The Id is GUID for the ScheduleJob. To get the GUID for the schedule job in the database, you can look in the tblScheduleItem table and find it there. If you don´t have access to the database, you can go to the schedule job page in the Episerver administration interface. Right click with the mouse on the page and select "Show framesource". In the HTML you can search for "GetRunningState". Then you will see the schedule job GUID like to image below.  
-![Get schedule job GUID from Episerver administration interface](documentation/EnvironmentSynchronizer_GetScheduleJobGuidFromHtml.jpg)  
+The Id is GUID for the ScheduleJob. To get the GUID for the schedule job in the database, you can look in the tblScheduleItem table and find it there. If you don´t have access to the database, you can go to the schedule job page in the Episerver administration interface. 
+Click on an schedule job and look on the URL. You can copy the GUID from there.  
+![Get schedule job GUID from Episerver administration interface](documentation/EnvironmentSynchronizer_GetScheduleJobGuidFromUrl.jpg)  
 **Name**: The name of the job that you want to update. You can use `*` as a wildcard. That means that it will go through all ScheduledJobs in Episerver CMS and enabled/disabled them. So you should have this as the first definition in the configuration.  
 *Note 1: The **Name** field is required to specify in the XML. But the environment synchronizer will only try to match this value if the Id field is empty. And the value can be empty.*   
 *Note 2: The name of the schedule job is not always the same as you can see in the administration interface. I had problem to find the right schedule job because I wrote the english name of the task. And after alot of scratching my head I realized that the names on the schedule jobs where in swedish in the database. So using Id is recommended.*  
