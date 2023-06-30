@@ -6,12 +6,12 @@ This addon provides the infrastructure to add handlers to handle this, including
 The synchronizer can be run as a Startup (see Startup.cs example below), InitializationModule or as a ScheduledJob. It depends on what you think is fitting your environment and project.
 
 ## Installation
-This will be packaged as a Nuget package named Addon.Episerver.EnvironmentSynchronizer and put in Episervers Nuget feed once tested a bit more.  
+This packaged will be found as a Nuget package named Addon.Episerver.EnvironmentSynchronizer in the Optiomisely [AKA Episerver] NuGet feed.  [https://nuget.optimizely.com/package/?id=Addon.Episerver.EnvironmentSynchronizer](https://nuget.optimizely.com/package/?id=Addon.Episerver.EnvironmentSynchronizer)  
 
 ## Configuration
 Example .json  
 ```json
-"EnvironmentSynchronizerOptions": {
+"EnvironmentSynchronizer": {
     "RunAsInitializationModule": true,
     "RunInitializationModuleEveryStartup": false,
     "SiteDefinitions": [
