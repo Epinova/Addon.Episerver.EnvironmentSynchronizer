@@ -6,7 +6,7 @@ Note: The changes for all user groups are saved with "ReplaceChildPermissions" f
 
 appsettings.json example to use ForeLogin on website "Website2".  
 ```json
-"EnvironmentSynchronizerOptions": {
+"EnvironmentSynchronizer": {
     "RunAsInitializationModule": true,
     "RunInitializationModuleEveryStartup": false,
     "SiteDefinitions": [
