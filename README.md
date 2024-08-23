@@ -335,3 +335,8 @@ If you clik on the schedule job and open up the information page. You can click 
 ![Start schedule job 'Environment Synchronization'](documentation/EnvironmentSynchronizer_ScheduleJobs_Start.jpg)  
 After the schronization is done. Click on the "History" tab and see the result.  
 ![View history of schedule job 'Environment Synchronization'](documentation/EnvironmentSynchronizer_ScheduleJobs_History.jpg)  
+
+# What is wrong?
+## Run ScheduleJob
+If you run the scheduled job "Environment Synchronization" and get the message "Unable to resolve service for type 'Addon.Episerver.EnvironmentSynchronizer.IEnvironmentSynchronizationManager' while attempting to activate 'Addon.Episerver.EnvironmentSynchronizer.Jobs.EnvironmentSynchronizationJob'.". 
+Then you have installed the NuGet package but you have not add "services.AddEnvironmentSynchronization();" in the startup. Go through the installation instructions earlier in this readme.
