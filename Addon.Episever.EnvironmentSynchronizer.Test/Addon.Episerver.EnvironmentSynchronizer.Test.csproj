@@ -2,7 +2,7 @@
   <PropertyGroup>
     <RootNamespace>Addon.Episever.EnvironmentSynchronizer.Test</RootNamespace>
     <AssemblyName>Addon.Episever.EnvironmentSynchronizer.Test</AssemblyName>
-	<TargetFrameworks>net6.0;net7.0</TargetFrameworks>
+	<TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -30,7 +30,10 @@
 	<ItemGroup Condition="'$(TargetFramework)' == 'net7.0' ">
 		<PackageReference Include="EPiServer.CMS.AspNetCore" Version="12.11.0" />
 	</ItemGroup>
-	<ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0' ">
+    <PackageReference Include="EPiServer.CMS.AspNetCore" Version="12.11.0" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="3.2.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
