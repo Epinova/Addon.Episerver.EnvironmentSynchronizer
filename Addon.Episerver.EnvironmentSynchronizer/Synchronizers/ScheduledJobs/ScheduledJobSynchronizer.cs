@@ -102,7 +102,7 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Synchronizers.ScheduledJobs
             catch (Exception ex)
             {
                 extraInfoMessage = $"id=\"{job.Id}\" name=\"{job.Name}\"";
-                Logger.Error($"Error when try to loaf schedulejob id=\"{job.Id}\" name=\"{job.Name}\".", ex);
+                Logger.Error($"Error when try to load schedulejob id=\"{job.Id}\" name=\"{job.Name}\".", ex);
             }
 
 
