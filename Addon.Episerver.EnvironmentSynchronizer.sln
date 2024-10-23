@@ -10,6 +10,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{886607B0-4954-4DED-962B-0B2BC85CAE15}"
 	ProjectSection(SolutionItems) = preProject
 		documentation\ForceLogin.md = documentation\ForceLogin.md
+		documentation\SearchReindexSynchronizer.md = documentation\SearchReindexSynchronizer.md
 		README.md = README.md
 	EndProjectSection
 EndProject

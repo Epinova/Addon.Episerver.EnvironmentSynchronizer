@@ -42,7 +42,7 @@ Example .json
     ],
     "ScheduledJobs": [
       {
-        "name": "*",
+        "Id": "*",
         "IsEnabled": false
       },
       {
@@ -197,7 +197,7 @@ This function is implemented for these projects that don´t want the payload of 
 **Id** is the GUID that identify the site. If this is provided it will ignore the "Name" attribute.  
 **Name** is the name of the sitedefinition that will be updated. If **Id** is not specified it will match the existing SiteDefinition in the Episerver CMS against this name.  
 **SiteUrl*** is the SiteUrl that this site should have/use.
-[**ForceLogin***](/Documentation/ForceLogin.md) will remove 'Everyone' AccessLevel.Read if it is found for the site.
+[**ForceLogin***](/documentation/ForceLogin.md) will remove 'Everyone' AccessLevel.Read if it is found for the site.
 
 ### hosts
 You need to specify all the hosts that the site needs. When the synchronizer is updating a SiteDefinition it will expect that you have specified all hostnames. So of you in Episerver CMS has a extra host that is not specified in the web.config it will be removed.
@@ -340,3 +340,6 @@ After the schronization is done. Click on the "History" tab and see the result.
 ## Run ScheduleJob
 If you run the scheduled job "Environment Synchronization" and get the message "Unable to resolve service for type 'Addon.Episerver.EnvironmentSynchronizer.IEnvironmentSynchronizationManager' while attempting to activate 'Addon.Episerver.EnvironmentSynchronizer.Jobs.EnvironmentSynchronizationJob'.". 
 Then you have installed the NuGet package but you have not add "services.AddEnvironmentSynchronization();" in the startup. Go through the installation instructions earlier in this readme.
+## Unable to autorun search and navigation indexing job
+Environment synchronizer is unable to trigger this job using `"AutoRun: true"`. This is because the job requires access to `HttpContext` and the `IScheduledJobExecutor` runs jobs as background tasks, where `HttpContext` does not exist.
+This can be solved by modifying the job via a custom synchronizer. [**See solution.**](/documentation/SearchReindexSynchronizer.md)
