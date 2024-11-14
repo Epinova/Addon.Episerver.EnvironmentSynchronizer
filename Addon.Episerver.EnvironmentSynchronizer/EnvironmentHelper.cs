@@ -9,7 +9,7 @@ namespace Addon.Episerver.EnvironmentSynchronizer
 
         public static bool IsPreProductionEnvironment(string environmentName)
         {
-            return string.Equals(environmentName, KnownEnvironmentNames.PreProduction);
+            return string.Equals(environmentName, KnownEnvironmentNames.Preproduction);
         }
 
         public static bool IsIntegrationEnvironment(string environmentName)
