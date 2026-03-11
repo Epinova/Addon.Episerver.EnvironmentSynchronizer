@@ -1,7 +1,7 @@
 variables:
   system.debug: false
   major: 1
-  minor: 2
+  minor: 3
 
 name: $(major).$(minor).$(rev:r) #Build.BuildNumber
 
@@ -36,4 +36,5 @@ steps:
       - 6.0.x
       - 7.0.x
       - 8.0.x
+      - 10.0.x
     workingDirectory: "$(System.DefaultWorkingDirectory)"
