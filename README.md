@@ -193,11 +193,13 @@ Tells the synchronizer that you want to run it as an InitializationModule.
 Tells the synchronizer that you will run synchronization with InitializationModule every time the application is starting up. If this is set to `false`, that is default if this attribute is not set. It will check for a flag that tells the synchronizer if it has already synchronized the current environment or not. So it will only run if the flag specifies a value of a environment that is not equal to the current environment. This logic will only be used for the InitializationModule logic. The schedule job will always synchronize.  
 This function is implemented for these projects that don´t want the payload of synchronization every time the application starts up.
 
-### sitedefinition
+### sitedefinition / application
 **Id** is the GUID that identify the site. If this is provided it will ignore the "Name" attribute.  
 **Name** is the name of the sitedefinition that will be updated. If **Id** is not specified it will match the existing SiteDefinition in the Episerver CMS against this name.  
 **SiteUrl*** is the SiteUrl that this site should have/use.
 [**ForceLogin***](/documentation/ForceLogin.md) will remove 'Everyone' AccessLevel.Read if it is found for the site.
+
+For Optimizely CMS 13, `SiteDefinitions` is retained as the configuration key for compatibility, but it synchronizes both `InProcessWebsite` applications and headless `Website` applications. The existing application's concrete website type is retained. `Name` must match the application's unique name; `Id` is not used because applications are identified by name. `SiteUrl` is represented by a primary `ApplicationHost`, and a legacy `*` host is converted into the application's default status. You can also specify `"IsDefault": true` explicitly.
 
 ### hosts
 You need to specify all the hosts that the site needs. When the synchronizer is updating a SiteDefinition it will expect that you have specified all hostnames. So of you in Episerver CMS has a extra host that is not specified in the web.config it will be removed.
@@ -213,6 +215,8 @@ Options (`EPiServer.Web.HostDefinitionType [Enum]`):
 - **RedirectPermanent**
 - **RedirectTemporary**
 **Language** is the CultureInfo that is related to the hostname  
+
+For CMS 13, hosts are `EPiServer.Applications.ApplicationHost` instances and **Type** uses `ApplicationHostType`: `Default`, `Primary`, `Preview`, `Edit`, `Media`, `RedirectPermanent`, or `RedirectTemporary`.
 
 ### SetRoles
 Can contain a list of roles that will be added/updated. If not exist in existing list it will be added. If it exist, the AccessLevel will be updated with the 

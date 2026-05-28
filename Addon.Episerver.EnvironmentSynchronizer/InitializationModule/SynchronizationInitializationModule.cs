@@ -1,8 +1,12 @@
 ﻿using EPiServer.Framework;
 using EPiServer.Framework.Initialization;
 using EPiServer.Logging;
-using EPiServer.ServiceLocation;
 using System;
+#if NET10_0_OR_GREATER
+using Microsoft.Extensions.DependencyInjection;
+#else
+using EPiServer.ServiceLocation;
+#endif
 
 namespace Addon.Episerver.EnvironmentSynchronizer.InitializationModule
 {
@@ -17,11 +21,14 @@ namespace Addon.Episerver.EnvironmentSynchronizer.InitializationModule
 		{
 			try
 			{
-				var _executer = ServiceLocator.Current.GetInstance<IInitializationExecuter>();
+#if NET10_0_OR_GREATER
+				var executer = context.Services.GetRequiredService<IInitializationExecuter>();
+#else
+				var executer = ServiceLocator.Current.GetInstance<IInitializationExecuter>();
+#endif
 
 				Logger.Information($"InitializableModule:SynchronizationInitializationModule Initialize");
-				_executer.Initialize();
-
+				executer.Initialize();
 			}
 			catch (InvalidOperationException inOpEx)
 			{
@@ -43,7 +50,5 @@ namespace Addon.Episerver.EnvironmentSynchronizer.InitializationModule
 		public void Preload(string[] parameters) { }
 
 		public void Uninitialize(InitializationEngine context) { }
-
-
 	}
 }

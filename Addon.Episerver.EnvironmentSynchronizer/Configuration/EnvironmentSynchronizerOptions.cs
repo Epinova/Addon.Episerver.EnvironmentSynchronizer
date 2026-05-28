@@ -1,6 +1,10 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+#if NET10_0_OR_GREATER
+using EPiServer.Applications;
+#else
 using EPiServer.Web;
+#endif
 
 namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 {
@@ -43,6 +47,8 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
         [Required]
         public string SiteUrl { get; set; }
 
+		public bool IsDefault { get; set; }
+
 		public bool ForceLogin { get; set; }
 
 		[Required]
@@ -59,7 +65,11 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 
         public bool UseSecureConnection { get; set; }
 
+#if NET10_0_OR_GREATER
+        public ApplicationHostType Type { get; set; }
+#else
         public HostDefinitionType Type { get; set; }
+#endif
 
         public string Language { get; set; }
     }

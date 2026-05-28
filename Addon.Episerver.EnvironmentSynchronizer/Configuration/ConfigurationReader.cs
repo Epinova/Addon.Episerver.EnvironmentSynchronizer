@@ -1,12 +1,16 @@
 using Addon.Episerver.EnvironmentSynchronizer.Models;
 using EPiServer.Logging;
-using EPiServer.Web;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Globalization;
 using Microsoft.Extensions.Options;
 using EPiServer.Security;
+#if NET10_0_OR_GREATER
+using EPiServer.Applications;
+#else
+using EPiServer.Web;
+#endif
 
 namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 {
@@ -95,10 +99,19 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 		{
 			var siteDefinition = new EnvironmentSynchronizerSiteDefinition()
 			{
+#if !NET10_0_OR_GREATER
 				Id = string.IsNullOrEmpty(options.Id) ? Guid.Empty : new Guid(options.Id),
+#endif
 				Name = string.IsNullOrEmpty(options.Name) ? string.Empty : options.Name,
 				SiteUrl = string.IsNullOrEmpty(options.SiteUrl) ? null : new Uri(options.SiteUrl),
+#if NET10_0_OR_GREATER
+				Hosts = ToHostDefinitions(options.Hosts, options.SiteUrl),
+#else
 				Hosts = ToHostDefinitions(options.Hosts),
+#endif
+#if NET10_0_OR_GREATER
+				IsDefault = options.IsDefault || options.Hosts.Any(host => host.Name == "*"),
+#endif
 				ForceLogin = options.ForceLogin,
 				SetRoles = options.SetRoles != null ? ToSetRoleDefinitions(options.SetRoles) : new List<SetRoleDefinition>(),
 				RemoveRoles = options.RemoveRoles != null ? ToRemoveRoleDefinitions(options.RemoveRoles) : new List<RemoveRoleDefinition>()
@@ -107,6 +120,35 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 			return siteDefinition;
 		}
 
+#if NET10_0_OR_GREATER
+		private List<ApplicationHost> ToHostDefinitions(IList<HostOptions> hosts, string siteUrl)
+		{
+			var siteUri = string.IsNullOrEmpty(siteUrl) ? null : new Uri(siteUrl);
+			var hasExplicitPrimaryHost = hosts.Any(hostOptions => hostOptions.Type == ApplicationHostType.Primary);
+			var result = hosts
+				.Where(hostOptions => hostOptions.Name != "*")
+				.Select(hostOptions => new ApplicationHost(hostOptions.Name)
+				{
+					Type = !hasExplicitPrimaryHost && siteUri != null && string.Equals(hostOptions.Name, siteUri.Authority, StringComparison.OrdinalIgnoreCase)
+						? ApplicationHostType.Primary
+						: hostOptions.Type,
+					PreferredUrlScheme = hostOptions.UseSecureConnection ? UrlScheme.Https : UrlScheme.Http,
+					Locale = string.IsNullOrEmpty(hostOptions.Language) ? null : new CultureInfo(hostOptions.Language)
+				})
+				.ToList();
+
+			if (!hasExplicitPrimaryHost && siteUri != null && !result.Any(host => string.Equals(host.Authority, siteUri.Authority, StringComparison.OrdinalIgnoreCase)))
+			{
+				result.Add(new ApplicationHost(siteUri.Authority)
+				{
+					Type = ApplicationHostType.Primary,
+					PreferredUrlScheme = siteUri.Scheme == Uri.UriSchemeHttps ? UrlScheme.Https : UrlScheme.Http
+				});
+			}
+
+			return result;
+		}
+#else
 		private List<HostDefinition> ToHostDefinitions(IList<HostOptions> hosts)
 		{
 			return hosts.Select(hostOptions => {
@@ -119,6 +161,7 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 				};
 			}).ToList();
 		}
+#endif
 
 		private List<SetRoleDefinition> ToSetRoleDefinitions(IList<SetRoleOptions> setRoles)
 		{

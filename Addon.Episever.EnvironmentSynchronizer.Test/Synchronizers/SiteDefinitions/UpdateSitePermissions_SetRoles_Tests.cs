@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
+#if !NET10_0_OR_GREATER
 namespace Addon.Episever.EnvironmentSynchronizer.Test.Synchronizers.SiteDefinitions
 {
 	public class UpdateSitePermissions_SetRoles_Tests
@@ -227,3 +228,4 @@ namespace Addon.Episever.EnvironmentSynchronizer.Test.Synchronizers.SiteDefiniti
 
 	}
 }
+#endif
