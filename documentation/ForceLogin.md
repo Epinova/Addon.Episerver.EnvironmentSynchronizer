@@ -1,6 +1,6 @@
 # ForceLogin
-ForceLogin is a function that very simple remove the access for anonymous user group "Everyone" on the site where this is set to 'true'. It does not matter what AccessLevel the user group had. It will be simple removed.  
-Note: The changes for all user groups are saved with "ReplaceChildPermissions" from start page lever for the site. That means that specific permissions on a specific webpage will be lost.
+ForceLogin is a function that removes access for the anonymous user group "Everyone" on the application where this is set to `true`. It does not matter what AccessLevel the user group had. It will be removed.  
+Note: The changes for all user groups are saved with "ReplaceChildPermissions" from the application entry point. That means that specific permissions on a specific webpage will be lost.
   
 [<= Back](../README.md)
 
@@ -11,8 +11,7 @@ appsettings.json example to use ForeLogin on website "Website2".
     "RunInitializationModuleEveryStartup": false,
     "SiteDefinitions": [
       {
-        "name": "Website1",
-        "SiteUrl": "https://website1.com/",
+        "Name": "Website1",
         "ForceLogin": false,
         "Hosts": [
           {
@@ -27,8 +26,7 @@ appsettings.json example to use ForeLogin on website "Website2".
         ]
       },
       {
-        "name": "Website2",
-        "SiteUrl": "https://website2.com/",
+        "Name": "Website2",
         "ForceLogin": true,
         "Hosts": [
           {

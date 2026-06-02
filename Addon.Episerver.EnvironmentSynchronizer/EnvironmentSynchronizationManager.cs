@@ -1,6 +1,5 @@
 ﻿using System;
 using EPiServer.Logging;
-using EPiServer.ServiceLocation;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,12 +21,16 @@ namespace Addon.Episerver.EnvironmentSynchronizer
         private static readonly ILogger Logger = LogManager.GetLogger();
         private readonly IEnumerable<IEnvironmentSynchronizer> _environmentSynchronizers;
         private readonly IEnvironmentSynchronizationStore _environmentSynchronizationStore;
+        private readonly IEnvironmentNameSource _environmentNameSource;
 
         public EnvironmentSynchronizationManager(
-            IEnumerable<IEnvironmentSynchronizer> environmentSynchronizers, IEnvironmentSynchronizationStore environmentSynchronizationStore)
+            IEnumerable<IEnvironmentSynchronizer> environmentSynchronizers,
+            IEnvironmentSynchronizationStore environmentSynchronizationStore,
+            IEnvironmentNameSource environmentNameSource = null)
         {
             _environmentSynchronizers = environmentSynchronizers;
             _environmentSynchronizationStore = environmentSynchronizationStore;
+            _environmentNameSource = environmentNameSource;
         }
 
         public string Synchronize()
@@ -75,8 +78,7 @@ namespace Addon.Episerver.EnvironmentSynchronizer
         // TODO: Verify that this still works
         public string GetEnvironmentName()
         {
-	        ServiceLocator.Current.TryGetExistingInstance<IEnvironmentNameSource>(out var environmentNameSource);
-	        var environmentName = environmentNameSource != null ? environmentNameSource.GetCurrentEnvironmentName() : string.Empty;
+	        var environmentName = _environmentNameSource != null ? _environmentNameSource.GetCurrentEnvironmentName() : string.Empty;
 
 	        if (string.IsNullOrEmpty(environmentName))
 	        {

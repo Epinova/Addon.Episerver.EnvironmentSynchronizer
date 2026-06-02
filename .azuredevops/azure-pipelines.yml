@@ -1,7 +1,7 @@
 variables:
   system.debug: false
-  major: 1
-  minor: 3
+  major: 2
+  minor: 0
 
 name: $(major).$(minor).$(rev:r) #Build.BuildNumber
 
@@ -33,8 +33,5 @@ steps:
 - template: nuget.3.yml@pipelines
   parameters:
     dotnetVersions:
-      - 6.0.x
-      - 7.0.x
-      - 8.0.x
       - 10.0.x
     workingDirectory: "$(System.DefaultWorkingDirectory)"

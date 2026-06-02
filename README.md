@@ -1,7 +1,7 @@
-# Optimizely/Episerver CMS Environment Synchronizer
-Ensures that content and settings that are stored in the databases are corrected given the current environment. This is helpful after a content synchronization between different Episerver environments.  
+# Optimizely CMS 13 Environment Synchronizer
+Ensures that content and settings that are stored in the databases are corrected given the current environment. This is helpful after a content synchronization between different Optimizely CMS environments.  
 When synchronizing databases between environments there might be things that needs to be configured for each environment.
-This addon provides the infrastructure to add handlers to handle this, including prebuilt handlers for siteDefinitions and ScheduledJobs that can be configured in configuration files (a.k.a. appSettings.json)
+This addon provides the infrastructure to add handlers to handle this, including prebuilt handlers for applications and ScheduledJobs that can be configured in configuration files (a.k.a. appSettings.json)
   
 The synchronizer can be run as a Startup (see Startup.cs example below), InitializationModule or as a ScheduledJob. It depends on what you think is fitting your environment and project.
 
@@ -16,8 +16,8 @@ Example .json
     "RunInitializationModuleEveryStartup": false,
     "SiteDefinitions": [
       {
-        "name": "CustomerX",
-        "SiteUrl": "https://custxmstr972znb5prep.azurewebsites.net/",
+        "Name": "CustomerX",
+        "IsDefault": true,
         "ForceLogin": true,
         "Hosts": [
           {
@@ -193,23 +193,27 @@ Tells the synchronizer that you want to run it as an InitializationModule.
 Tells the synchronizer that you will run synchronization with InitializationModule every time the application is starting up. If this is set to `false`, that is default if this attribute is not set. It will check for a flag that tells the synchronizer if it has already synchronized the current environment or not. So it will only run if the flag specifies a value of a environment that is not equal to the current environment. This logic will only be used for the InitializationModule logic. The schedule job will always synchronize.  
 This function is implemented for these projects that don´t want the payload of synchronization every time the application starts up.
 
-### sitedefinition
-**Id** is the GUID that identify the site. If this is provided it will ignore the "Name" attribute.  
-**Name** is the name of the sitedefinition that will be updated. If **Id** is not specified it will match the existing SiteDefinition in the Episerver CMS against this name.  
-**SiteUrl*** is the SiteUrl that this site should have/use.
-[**ForceLogin***](/documentation/ForceLogin.md) will remove 'Everyone' AccessLevel.Read if it is found for the site.
+### application
+`SiteDefinitions` is retained as the configuration key for compatibility, but this package now synchronizes CMS 13 applications. It supports both `InProcessWebsite` applications and headless `Website` applications, and the existing application's concrete website type is retained.
+
+**Id** is the CMS 13 application unique name, `Application.Name`. If this is provided it will ignore the `Name` attribute.  
+**Name** is the application display name, `Application.DisplayName`, used when **Id** is not specified.  
+**IsDefault** optionally sets whether the application should be the default application. If omitted, the current default state is left unchanged.  
+[**ForceLogin***](/documentation/ForceLogin.md) will remove 'Everyone' AccessLevel.Read if it is found for the application entry point.
 
 ### hosts
-You need to specify all the hosts that the site needs. When the synchronizer is updating a SiteDefinition it will expect that you have specified all hostnames. So of you in Episerver CMS has a extra host that is not specified in the web.config it will be removed.
+You need to specify all the hosts that the application needs. When the synchronizer updates an application it replaces the configured host list, so hosts that are not specified in configuration will be removed.
 
 ### host
 **Name** is the hostname. Example local.alloydemo.se  
 **UseSecureConnection** specify if it is a http/https URL.  
-**Type** is the type of the host. It is the enum EPiServer.Web.HostDefinitionType that are used by Episerver CMS. If the Type is not specified it will be set to `Undefined`.  
-Options (`EPiServer.Web.HostDefinitionType [Enum]`):  
-- **Undefined**
-- **Edit**
+**Type** is the type of the host. It is the enum `EPiServer.Applications.ApplicationHostType`. If the Type is not specified it will be set to `Default`.  
+Options (`ApplicationHostType [Enum]`):  
+- **Default**
 - **Primary**
+- **Preview**
+- **Edit**
+- **Media**
 - **RedirectPermanent**
 - **RedirectTemporary**
 **Language** is the CultureInfo that is related to the hostname  
