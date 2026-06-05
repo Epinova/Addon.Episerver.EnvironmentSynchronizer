@@ -4,7 +4,6 @@ using Addon.Episerver.EnvironmentSynchronizer.DynamicData;
 using Addon.Episerver.EnvironmentSynchronizer.Jobs;
 using EPiServer.DataAbstraction;
 using EPiServer.Logging;
-using EPiServer.PlugIn;
 using EPiServer.Scheduler;
 using EPiServer.ServiceLocation;
 
@@ -65,9 +64,9 @@ namespace Addon.Episerver.EnvironmentSynchronizer.InitializationModule
                 try
                 {
                     var jobId =
-                        ((ScheduledPlugInAttribute)typeof(EnvironmentSynchronizationJob).GetCustomAttributes(
-                            typeof(ScheduledPlugInAttribute), true)[0]).GUID;
-                    var job = _scheduledJobRepository.Get(Guid.Parse(jobId));
+                        ((ScheduledJobAttribute)typeof(EnvironmentSynchronizationJob).GetCustomAttributes(
+                            typeof(ScheduledJobAttribute), true)[0]).GetGUID();
+                    var job = jobId.HasValue ? _scheduledJobRepository.Get(jobId.Value) : null;
 
                     if (job is not null)
                     {

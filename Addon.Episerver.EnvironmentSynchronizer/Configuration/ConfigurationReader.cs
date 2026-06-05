@@ -1,146 +1,164 @@
 using Addon.Episerver.EnvironmentSynchronizer.Models;
 using EPiServer.Logging;
-using EPiServer.Web;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Globalization;
 using Microsoft.Extensions.Options;
 using EPiServer.Security;
+using EPiServer.Applications;
 
 namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 {
-	public class ConfigurationReader : IConfigurationReader
-	{
-		private static readonly ILogger Logger = LogManager.GetLogger();
+    public class ConfigurationReader : IConfigurationReader
+    {
+        private static readonly ILogger Logger = LogManager.GetLogger();
 
-		private readonly EnvironmentSynchronizerOptions _configuration;
+        private readonly EnvironmentSynchronizerOptions _configuration;
 
-		public ConfigurationReader(IOptions<EnvironmentSynchronizerOptions> synchronizerConfiguration)
+        public ConfigurationReader(IOptions<EnvironmentSynchronizerOptions> synchronizerConfiguration)
         {
-			_configuration = synchronizerConfiguration.Value;
+            _configuration = synchronizerConfiguration.Value;
         }
 
-		public SynchronizationData ReadConfiguration()
-		{
-			var syncData = new SynchronizationData();
+        public SynchronizationData ReadConfiguration()
+        {
+            var syncData = new SynchronizationData();
 
-			if(_configuration == null)
+            if (_configuration == null)
             {
-				return syncData;
+                return syncData;
             }
 
-			try
-			{
-				syncData.RunAsInitializationModule = _configuration.RunAsInitializationModule;
-				syncData.RunInitializationModuleEveryStartup = _configuration.RunInitializationModuleEveryStartup;
+            try
+            {
+                syncData.RunAsInitializationModule = _configuration.RunAsInitializationModule;
+                syncData.RunInitializationModuleEveryStartup = _configuration.RunInitializationModuleEveryStartup;
 
-				if (_configuration.SiteDefinitions != null && _configuration.SiteDefinitions.Count > 0)
-				{
-					syncData.SiteDefinitions = new List<EnvironmentSynchronizerSiteDefinition>();
-					foreach (var options in _configuration.SiteDefinitions)
-					{
-						var siteDefinition = CreateEnvironmentSynchronizerSiteDefinition(options);
-						if (!string.IsNullOrEmpty(siteDefinition.Name) && siteDefinition.SiteUrl != null)
-						{
-							syncData.SiteDefinitions.Add(siteDefinition);
-						}
-					}
-				}
-				else
-				{
-					Logger.Information($"Found no site definitions to handle. Missing Name/SiteUrl?");
-				}
+                if (_configuration.SiteDefinitions != null && _configuration.SiteDefinitions.Count > 0)
+                {
+                    syncData.SiteDefinitions = new List<EnvironmentSynchronizerSiteDefinition>();
+                    foreach (var options in _configuration.SiteDefinitions)
+                    {
+                        var siteDefinition = CreateEnvironmentSynchronizerSiteDefinition(options);
+                        if (!string.IsNullOrEmpty(siteDefinition.Name))
+                        {
+                            syncData.SiteDefinitions.Add(siteDefinition);
+                        }
+                    }
+                }
+                else
+                {
+                    Logger.Information($"Found no site definitions to handle. Missing Name?");
+                }
 
-				if (_configuration.ScheduledJobs != null && _configuration.ScheduledJobs.Count > 0)
-				{
-					syncData.ScheduledJobs = new List<ScheduledJobDefinition>();
-					foreach (var options in _configuration.ScheduledJobs)
-					{
-						var job = new ScheduledJobDefinition
-						{
-							Id = options.Id,
-							Name = options.Name,
-							IsEnabled = options.IsEnabled,
-							AutoRun = options.AutoRun
-						};
-						syncData.ScheduledJobs.Add(job);
-					}
-				}
-				else
-				{
-					Logger.Information($"Found no schedule jobs to handle.");
-				}
-			}
-			catch (ArgumentException argEx)
-			{
-				if (argEx.Message.Contains("is not a valid host name"))
-				{
-					Logger.Error($"EnvironmentSynchronizer configuration found in the appSettings.json but there are hostnames that is not valid.", argEx);
-				} else
-				{
-					Logger.Error($"EnvironmentSynchronizer configuration found in the appSettings.json but some arguments is not correct.", argEx);
-				}
-				
-			}
-			catch (Exception ex)
-			{
-				Logger.Error($"No configuration found in the appSettings.json. Missing EnvironmentSynchronizer section.", ex);
-			}
+                if (_configuration.ScheduledJobs != null && _configuration.ScheduledJobs.Count > 0)
+                {
+                    syncData.ScheduledJobs = new List<ScheduledJobDefinition>();
+                    foreach (var options in _configuration.ScheduledJobs)
+                    {
+                        var job = new ScheduledJobDefinition
+                        {
+                            Id = options.Id,
+                            Name = options.Name,
+                            IsEnabled = options.IsEnabled,
+                            AutoRun = options.AutoRun
+                        };
+                        syncData.ScheduledJobs.Add(job);
+                    }
+                }
+                else
+                {
+                    Logger.Information($"Found no schedule jobs to handle.");
+                }
+            }
+            catch (ArgumentException argEx)
+            {
+                if (argEx.Message.Contains("is not a valid host name"))
+                {
+                    Logger.Error($"EnvironmentSynchronizer configuration found in the appSettings.json but there are hostnames that is not valid.", argEx);
+                }
+                else
+                {
+                    Logger.Error($"EnvironmentSynchronizer configuration found in the appSettings.json but some arguments is not correct.", argEx);
+                }
 
-			return syncData;
-		}
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"No configuration found in the appSettings.json. Missing EnvironmentSynchronizer section.", ex);
+            }
 
-		private EnvironmentSynchronizerSiteDefinition CreateEnvironmentSynchronizerSiteDefinition(SiteDefinitionOptions options)
-		{
-			var siteDefinition = new EnvironmentSynchronizerSiteDefinition()
-			{
-				Id = string.IsNullOrEmpty(options.Id) ? Guid.Empty : new Guid(options.Id),
-				Name = string.IsNullOrEmpty(options.Name) ? string.Empty : options.Name,
-				SiteUrl = string.IsNullOrEmpty(options.SiteUrl) ? null : new Uri(options.SiteUrl),
-				Hosts = ToHostDefinitions(options.Hosts),
-				ForceLogin = options.ForceLogin,
-				SetRoles = options.SetRoles != null ? ToSetRoleDefinitions(options.SetRoles) : new List<SetRoleDefinition>(),
-				RemoveRoles = options.RemoveRoles != null ? ToRemoveRoleDefinitions(options.RemoveRoles) : new List<RemoveRoleDefinition>()
-			};
+            return syncData;
+        }
 
-			return siteDefinition;
-		}
+        private EnvironmentSynchronizerSiteDefinition CreateEnvironmentSynchronizerSiteDefinition(SiteDefinitionOptions options)
+        {
+            var siteDefinition = new EnvironmentSynchronizerSiteDefinition()
+            {
+                Id = string.IsNullOrEmpty(options.Id) ? string.Empty : options.Id,
+                Name = string.IsNullOrEmpty(options.Name) ? string.Empty : options.Name,
+                Hosts = ToApplicationHosts(options.Hosts),
+                IsDefault = options.IsDefault,
+                ForceLogin = options.ForceLogin,
+                SetRoles = options.SetRoles != null ? ToSetRoleDefinitions(options.SetRoles) : new List<SetRoleDefinition>(),
+                RemoveRoles = options.RemoveRoles != null ? ToRemoveRoleDefinitions(options.RemoveRoles) : new List<RemoveRoleDefinition>()
+            };
 
-		private List<HostDefinition> ToHostDefinitions(IList<HostOptions> hosts)
-		{
-			return hosts.Select(hostOptions => {
-				return new HostDefinition
-				{
-					Name = hostOptions.Name,
-					Type = hostOptions.Type != HostDefinitionType.Undefined ? hostOptions.Type : HostDefinitionType.Undefined,
-					UseSecureConnection = hostOptions.UseSecureConnection,
-					Language = string.IsNullOrEmpty(hostOptions.Language) ? null : new CultureInfo(hostOptions.Language)
-				};
-			}).ToList();
-		}
+            return siteDefinition;
+        }
 
-		private List<SetRoleDefinition> ToSetRoleDefinitions(IList<SetRoleOptions> setRoles)
-		{
-			return setRoles.Select(setRoleOptions =>
-			{
-				return new SetRoleDefinition
-				{
-					Name = setRoleOptions.Name,
-					Access = setRoleOptions.Access != null ? AccessLevelConverter.ConvertToAccessLevel(setRoleOptions.Access) : AccessLevel.NoAccess,
-				};
-			}).ToList();
-		}
+        private List<ApplicationHost> ToApplicationHosts(IList<HostOptions> hosts)
+        {
+            return (hosts ?? [])
+                .Select(hostOptions => new ApplicationHost(hostOptions.Name)
+                {
+                    Type = hostOptions.Type,
+                    PreferredUrlScheme = hostOptions.UseSecureConnection ? UrlScheme.Https : UrlScheme.Http,
+                    Locale = GetApplicationHostLocale(hostOptions)
+                })
+                .ToList();
+        }
 
-		private List<RemoveRoleDefinition> ToRemoveRoleDefinitions(IList<string> removeRoles)
-		{
-			return removeRoles.Select(removeRoleOptions =>
-			{
-				return new RemoveRoleDefinition
-				{
-					Name = removeRoleOptions
-				};
-			}).ToList();
-		}
-	}
+        private static CultureInfo GetApplicationHostLocale(HostOptions hostOptions)
+        {
+            if (string.IsNullOrEmpty(hostOptions.Language) || !SupportsLocale(hostOptions.Type))
+            {
+                return null;
+            }
+
+            return new CultureInfo(hostOptions.Language);
+        }
+
+        private static bool SupportsLocale(ApplicationHostType hostType)
+        {
+            return hostType == ApplicationHostType.Primary ||
+                   hostType == ApplicationHostType.Default ||
+                   hostType == ApplicationHostType.RedirectPermanent ||
+                   hostType == ApplicationHostType.RedirectTemporary;
+        }
+
+        private List<SetRoleDefinition> ToSetRoleDefinitions(IList<SetRoleOptions> setRoles)
+        {
+            return setRoles.Select(setRoleOptions =>
+            {
+                return new SetRoleDefinition
+                {
+                    Name = setRoleOptions.Name,
+                    Access = setRoleOptions.Access != null ? AccessLevelConverter.ConvertToAccessLevel(setRoleOptions.Access) : AccessLevel.NoAccess,
+                };
+            }).ToList();
+        }
+
+        private List<RemoveRoleDefinition> ToRemoveRoleDefinitions(IList<string> removeRoles)
+        {
+            return removeRoles.Select(removeRoleOptions =>
+            {
+                return new RemoveRoleDefinition
+                {
+                    Name = removeRoleOptions
+                };
+            }).ToList();
+        }
+    }
 }

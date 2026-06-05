@@ -16,9 +16,8 @@
     ],
     "SiteDefinitions": [
       {
-        "Id": "6AAEAF2F-20F9-41EB-8260-D0BBA76DB141",
+        "Id": "customerx",
         "Name": "CustomerX",
-        "SiteUrl": "https://custxmstr972znb5prep.azurewebsites.net/",
         "ForceLogin":  true,
         "Hosts": [
           {

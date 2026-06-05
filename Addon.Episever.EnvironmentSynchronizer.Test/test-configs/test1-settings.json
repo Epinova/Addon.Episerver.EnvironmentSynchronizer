@@ -16,9 +16,8 @@
     ],
     "SiteDefinitions": [
       {
-        "Id": "af4fdb8a-de6a-40de-a37b-e89c4e974231",
+        "Id": "sitename",
         "Name": "sitename",
-        "SiteUrl": "https://www.site.se/",
         "Hosts": [
           {
             "Name": "*",

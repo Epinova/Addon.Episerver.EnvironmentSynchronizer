@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using EPiServer.Web;
+using EPiServer.Applications;
 
 namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 {
@@ -10,9 +10,9 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 
         public bool RunAsInitializationModule { get; set; }
 
-        public bool RunInitializationModuleEveryStartup {  get; set;}
+        public bool RunInitializationModuleEveryStartup { get; set; }
 
-		public IList<SiteDefinitionOptions> SiteDefinitions { get; set; }
+        public IList<SiteDefinitionOptions> SiteDefinitions { get; set; }
 
         public IList<ScheduledJobOptions> ScheduledJobs { get; set; }
 
@@ -40,18 +40,17 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
         [Required]
         public string Name { get; set; }
 
+        public bool? IsDefault { get; set; }
+
+        public bool ForceLogin { get; set; }
+
         [Required]
-        public string SiteUrl { get; set; }
-
-		public bool ForceLogin { get; set; }
-
-		[Required]
         public IList<HostOptions> Hosts { get; set; }
 
-		public IList<SetRoleOptions> SetRoles { get; set; }
+        public IList<SetRoleOptions> SetRoles { get; set; }
 
-		public IList<string> RemoveRoles { get; set; }
-	}
+        public IList<string> RemoveRoles { get; set; }
+    }
 
     public class HostOptions
     {
@@ -59,7 +58,7 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Configuration
 
         public bool UseSecureConnection { get; set; }
 
-        public HostDefinitionType Type { get; set; }
+        public ApplicationHostType Type { get; set; }
 
         public string Language { get; set; }
     }

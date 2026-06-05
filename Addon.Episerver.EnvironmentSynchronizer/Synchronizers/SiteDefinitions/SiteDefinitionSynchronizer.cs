@@ -1,49 +1,48 @@
 using Addon.Episerver.EnvironmentSynchronizer.Configuration;
+using EPiServer.Core;
 using EPiServer.DataAbstraction;
 using EPiServer.Logging;
 using EPiServer.Security;
 using EPiServer.ServiceLocation;
-using EPiServer.Web;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using EPiServer.Applications;
 
 namespace Addon.Episerver.EnvironmentSynchronizer.Synchronizers.SiteDefinitions
 {
-	[ServiceConfiguration(typeof(IEnvironmentSynchronizer))]
+    [ServiceConfiguration(typeof(IEnvironmentSynchronizer))]
     public class SiteDefinitionSynchronizer : IEnvironmentSynchronizer
     {
+        private const string WebsiteDefinitionType = "application";
         private static readonly ILogger Logger = LogManager.GetLogger();
-        private readonly ISiteDefinitionRepository _siteDefinitionRepository;
-		private readonly IContentSecurityRepository _contentSecurityRepository;
-		private readonly IConfigurationReader _configurationReader;
+        private readonly IApplicationRepository _applicationRepository;
+        private readonly IContentSecurityRepository _contentSecurityRepository;
+        private readonly IConfigurationReader _configurationReader;
         private StringBuilder resultLog = new StringBuilder();
-        private string _environmentName = string.Empty;
 
-
-		public SiteDefinitionSynchronizer(
-            ISiteDefinitionRepository siteDefinitionRepository,
+        public SiteDefinitionSynchronizer(
+            IApplicationRepository applicationRepository,
             IContentSecurityRepository contentSecurityRepository,
             IConfigurationReader configurationReader)
         {
-	        Logger.Information("SiteDefinitionSynchronizer initialized.");
-            _siteDefinitionRepository = siteDefinitionRepository;
+            Logger.Information("SiteDefinitionSynchronizer initialized.");
+            _applicationRepository = applicationRepository;
             _contentSecurityRepository = contentSecurityRepository;
             _configurationReader = configurationReader;
         }
 
         public string Synchronize(string environmentName)
         {
-            _environmentName = environmentName;
-
             var syncConfiguration = _configurationReader.ReadConfiguration();
 
             if (syncConfiguration.SiteDefinitions == null || !syncConfiguration.SiteDefinitions.Any())
             {
-                Logger.Information("No site definitions found to synchronize.");
-                resultLog.AppendLine("No site definitions found to synchronize.<br />");
+                Logger.Information($"No {WebsiteDefinitionType} definitions found to synchronize.");
+                resultLog.AppendLine($"No {WebsiteDefinitionType} definitions found to synchronize.<br />");
                 return resultLog.ToString();
             }
 
@@ -53,17 +52,17 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Synchronizers.SiteDefinitions
             {
                 var updatedSites = MergeSiteDefinitions(syncConfiguration.SiteDefinitions);
 
-                Logger.Information($"Updated total of {updatedSites} sites.");
-                resultLog.AppendLine($"Updated total of {updatedSites} sites.<br />");
+                Logger.Information($"Updated total of {updatedSites} {WebsiteDefinitionType}s.");
+                resultLog.AppendLine($"Updated total of {updatedSites} {WebsiteDefinitionType}s.<br />");
             }
             catch (Exception ex)
             {
-                Logger.Error("An exception occured when trying to synchronize site definitions", ex);
-                resultLog.AppendLine($"An exception occured when trying to synchronize site definitions: {ex.Message}<br />");
+                Logger.Error($"An exception occured when trying to synchronize {WebsiteDefinitionType} definitions", ex);
+                resultLog.AppendLine($"An exception occured when trying to synchronize {WebsiteDefinitionType} definitions: {ex.Message}<br />");
             }
 
             stopwatch.Stop();
-            Logger.Information($"Synchronize site definitions took {stopwatch.ElapsedMilliseconds}ms.");
+            Logger.Information($"Synchronize {WebsiteDefinitionType} definitions took {stopwatch.ElapsedMilliseconds}ms.");
 
             return resultLog.ToString();
         }
@@ -71,159 +70,221 @@ namespace Addon.Episerver.EnvironmentSynchronizer.Synchronizers.SiteDefinitions
         private int MergeSiteDefinitions(IEnumerable<EnvironmentSynchronizerSiteDefinition> siteDefinitionsToUpdate)
         {
             var updatedSites = 0;
-            var existingSites = _siteDefinitionRepository.List();
+            var existingSites = _applicationRepository.List().Where(application => application is IRoutableApplication);
 
             foreach (var siteDefinitionToUpdate in siteDefinitionsToUpdate)
             {
-	            SiteDefinition site = GetExistingSiteDefinition(existingSites, siteDefinitionToUpdate);
+                Application site = GetExistingSiteDefinition(existingSites, siteDefinitionToUpdate);
                 if (site != null)
                 {
-					UpdateSiteDefinitionValues(site, siteDefinitionToUpdate);
-					updatedSites++;
+                    UpdateSiteDefinitionValues(site, siteDefinitionToUpdate);
+                    updatedSites++;
 
-					UpdateSitePermissions(site, siteDefinitionToUpdate);
-				}
+                    UpdateSitePermissions(site, siteDefinitionToUpdate);
+                }
                 else
                 {
-                    Logger.Warning($"Could not find site {siteDefinitionToUpdate.Name} or site already has site URL {siteDefinitionToUpdate.SiteUrl}.");
-                    resultLog.AppendLine($"Could not find site {siteDefinitionToUpdate.Name} or site already has site URL {siteDefinitionToUpdate.SiteUrl}.<br />");
+                    Logger.Warning($"Could not find {WebsiteDefinitionType} {siteDefinitionToUpdate.Name}.");
+                    resultLog.AppendLine($"Could not find {WebsiteDefinitionType} {siteDefinitionToUpdate.Name}.<br />");
                 }
             }
 
             return updatedSites;
         }
 
-        private void UpdateSiteDefinitionValues(SiteDefinition site, EnvironmentSynchronizerSiteDefinition siteDefinitionToUpdate)
+        private void UpdateSiteDefinitionValues(Application site, EnvironmentSynchronizerSiteDefinition siteDefinitionToUpdate)
         {
-			site = site.CreateWritableClone();
-			if (!string.IsNullOrEmpty(siteDefinitionToUpdate.Name) && site.Name != siteDefinitionToUpdate.Name)
-			{
-				// Will set the name of the site to the provided Name if Id exist and Name is specified and different from the found existing site.
-				site.Name = siteDefinitionToUpdate.Name;
-			}
-			site.SiteUrl = siteDefinitionToUpdate.SiteUrl;
-			site.Hosts = siteDefinitionToUpdate.Hosts;
+            var writableApplication = site.CreateWritableClone();
+            var writableSite = (IRoutableApplication)writableApplication;
 
-			_siteDefinitionRepository.Save(site);
-			Logger.Information($"Updated {siteDefinitionToUpdate.Name} to site URL {siteDefinitionToUpdate.SiteUrl} and {siteDefinitionToUpdate.Hosts.Count} hostnames.");
-			resultLog.AppendLine($"Updated {siteDefinitionToUpdate.Name} to site URL {siteDefinitionToUpdate.SiteUrl} and {siteDefinitionToUpdate.Hosts.Count} hostnames.<br />");
-
-		}
-
-		public void UpdateSitePermissions(SiteDefinition site, EnvironmentSynchronizerSiteDefinition siteDefinitionToUpdate)
-		{
-			Logger.Debug($"UpdateSitePermissions");
-			var siteStartPageContentLink = site.StartPage;
-
-			if (siteDefinitionToUpdate.ForceLogin || (siteDefinitionToUpdate.SetRoles != null && siteDefinitionToUpdate.SetRoles.Any()) || (siteDefinitionToUpdate.RemoveRoles != null && siteDefinitionToUpdate.RemoveRoles.Any()) && siteStartPageContentLink != null)
-			{
-				IContentSecurityDescriptor securityDescriptor = (IContentSecurityDescriptor)_contentSecurityRepository.Get(siteStartPageContentLink).CreateWritableClone();
-
-				if (securityDescriptor != null)
-				{
-					if (securityDescriptor.IsInherited)
-					{
-						securityDescriptor.IsInherited = false;
-					}
-
-					var existingEntries = GetExistingAce(securityDescriptor);
-
-					if (siteDefinitionToUpdate.SetRoles != null && siteDefinitionToUpdate.SetRoles.Any())
-					{
-						SetRoles(existingEntries, siteDefinitionToUpdate);
-					}
-
-					if (siteDefinitionToUpdate.RemoveRoles != null && siteDefinitionToUpdate.RemoveRoles.Any())
-					{
-						RemoveRoles(existingEntries, siteDefinitionToUpdate);
-					}
-
-					if (siteDefinitionToUpdate.ForceLogin)
-					{
-						Logger.Debug($"Start ForceLogin.");
-						RemoveRole(existingEntries, new RemoveRoleDefinition { Name = "Everyone" } , siteDefinitionToUpdate.Name);
-					}
-
-					SetAce(securityDescriptor, existingEntries);
-
-					_contentSecurityRepository.Save(siteStartPageContentLink, securityDescriptor, SecuritySaveType.Replace);
-					_contentSecurityRepository.Save(siteStartPageContentLink, securityDescriptor, SecuritySaveType.ReplaceChildPermissions);
-
-				} else {
-					Logger.Error($"Could not get a security descriptor from site {site.Name} startpage.");
-				}
-			}
-		}
-
-		private SiteDefinition GetExistingSiteDefinition(IEnumerable<SiteDefinition> existingSites, SiteDefinition siteDefinitionToUpdate)
-        {
-            SiteDefinition siteDefinition = null;
-
-            if (siteDefinitionToUpdate.Id != Guid.Empty)
+            if (!string.IsNullOrEmpty(siteDefinitionToUpdate.Name) && 
+                !string.Equals(writableApplication.DisplayName, siteDefinitionToUpdate.Name, StringComparison.Ordinal))
             {
-                //Update the site definition if it doesn't have the same value for SiteUrl 
-                siteDefinition = existingSites.FirstOrDefault(s => s.Id == siteDefinitionToUpdate.Id);
+                writableApplication.DisplayName = siteDefinitionToUpdate.Name;
+            }
+
+            var configuredHosts = (siteDefinitionToUpdate.Hosts ?? []).ToList();
+            var supportedHosts = GetSupportedHosts(site, configuredHosts);
+
+            if (configuredHosts.Count > 0 && supportedHosts.Count == 0)
+            {
+                Logger.Error($"Refusing to clear hosts for {WebsiteDefinitionType} {siteDefinitionToUpdate.Name}: configuration provided {configuredHosts.Count} host(s) but none are supported by {site.GetType().Name}. Existing hosts left unchanged.");
+                resultLog.AppendLine($"Refusing to clear hosts for {WebsiteDefinitionType} {siteDefinitionToUpdate.Name}: none of the configured hosts are supported. Existing hosts left unchanged.<br />");
             }
             else
             {
-                //Update the site definition if it doesn't have the same value for SiteUrl 
-                siteDefinition = existingSites.FirstOrDefault(s => s.Name == siteDefinitionToUpdate.Name);
-            }
+                writableSite.Hosts.Clear();
 
-            return siteDefinition;
+                foreach (var host in supportedHosts)
+                {
+                    writableSite.Hosts.Add(host);
+                }
+            }
+            _applicationRepository.SaveAsync(writableApplication, CancellationToken.None).GetAwaiter().GetResult();
+
+            if (siteDefinitionToUpdate.IsDefault is not null &&
+                ((IRoutableApplication)site).IsDefault != siteDefinitionToUpdate.IsDefault.Value)
+            {
+                _applicationRepository.MakeDefaultAsync(writableSite, siteDefinitionToUpdate.IsDefault.Value, CancellationToken.None).GetAwaiter().GetResult();
+            }
+            Logger.Information($"Updated {siteDefinitionToUpdate.Name} {WebsiteDefinitionType} with {supportedHosts.Count} hostnames.");
+            resultLog.AppendLine($"Updated {siteDefinitionToUpdate.Name} {WebsiteDefinitionType} with {supportedHosts.Count} hostnames.<br />");
+
         }
 
-		private List<AccessControlEntry> GetExistingAce(IContentSecurityDescriptor securityDescriptor)
-		{
-			return securityDescriptor.Entries.Select(x => x).ToList();
-		}
+        private List<ApplicationHost> GetSupportedHosts(Application site, IEnumerable<ApplicationHost> hosts)
+        {
+            var supportedHosts = new List<ApplicationHost>();
 
-		private void SetAce(IContentSecurityDescriptor securityDescriptor, IEnumerable<AccessControlEntry> existingEntries)
-		{
-			securityDescriptor.Clear();
-			foreach (var entry in existingEntries)
-			{
-				securityDescriptor.AddEntry(entry);
-			}
-		}
+            foreach (var host in hosts ?? [])
+            {
+                if (IsSupportedHostType(site, host.Type))
+                {
+                    supportedHosts.Add(host);
+                }
+                else
+                {
+                    Logger.Warning($"Skipping host {host.Authority} with type {host.Type} because it is not supported by {site.GetType().Name} {site.Name}.");
+                }
+            }
 
-		private void SetRoles(List<AccessControlEntry> existingEntries, EnvironmentSynchronizerSiteDefinition siteDefinitionToUpdate)
-		{
-			Logger.Debug($"Start SetRoles.");
-			foreach (var role in siteDefinitionToUpdate.SetRoles)
-			{
-				var existingRole = existingEntries.Where(x => x.Name == role.Name).FirstOrDefault();
-				if (existingRole != null)
-				{
-					existingEntries.Remove(existingRole);
-					Logger.Debug($"RemoveRole {existingRole.Name}.");
-				}
-				existingEntries.Add(new AccessControlEntry(role.Name, role.Access, SecurityEntityType.Role));
-				Logger.Debug($"SetRole {role.Name} {role.Access}.");
-				Logger.Information($"Set AccessControlEntry {role.Name} AccessLevel.{role.Access} for site {siteDefinitionToUpdate.Name}.");
-				resultLog.AppendLine($"Set AccessControlEntry {role.Name} AccessLevel.{role.Access} for site {siteDefinitionToUpdate.Name}.<br/>");
-			}
-		}
+            return supportedHosts;
+        }
 
-		private void RemoveRoles(List<AccessControlEntry> existingEntries, EnvironmentSynchronizerSiteDefinition siteDefinitionToUpdate)
-		{
-			Logger.Debug($"Start RemoveRoles.");
-			foreach (var role in siteDefinitionToUpdate.RemoveRoles)
-			{
-				RemoveRole(existingEntries, role, siteDefinitionToUpdate.Name);
-			}
-		}
-		private void RemoveRole(List<AccessControlEntry> existingEntries, RemoveRoleDefinition removeRoleDefinition, string siteName)
-		{
-			var existingRole = existingEntries.Where(x => x.Name == removeRoleDefinition.Name).FirstOrDefault();
-			if (existingRole != null)
-			{
-				existingEntries.Remove(existingRole);
-				Logger.Debug($"RemoveRole {existingRole.Name}.");
-				Logger.Information($"Remove AccessControlEntry {removeRoleDefinition.Name} AccessLevel.{existingRole.Access} for site {siteName}.");
-				resultLog.AppendLine($"Remove AccessControlEntry {removeRoleDefinition.Name} AccessLevel.{existingRole.Access} for site {siteName}.<br/>");
-			}
-		}
+        private static bool IsSupportedHostType(Application site, ApplicationHostType hostType)
+        {
+            if (site is Website)
+            {
+                return hostType == ApplicationHostType.Primary ||
+                       hostType == ApplicationHostType.Preview ||
+                       hostType == ApplicationHostType.Media;
+            }
 
+            if (site is InProcessWebsite)
+            {
+                return hostType == ApplicationHostType.Primary ||
+                       hostType == ApplicationHostType.Default ||
+                       hostType == ApplicationHostType.Edit ||
+                       hostType == ApplicationHostType.RedirectPermanent ||
+                       hostType == ApplicationHostType.RedirectTemporary ||
+                       hostType == ApplicationHostType.Media;
+            }
+
+            return false;
+        }
+
+        public void UpdateSitePermissions(Application website, EnvironmentSynchronizerSiteDefinition siteDefinitionToUpdate)
+        {
+            Logger.Debug($"UpdateSitePermissions");
+            var siteStartPageContentLink = ((IRoutableApplication)website).EntryPoint;
+
+            if (!ContentReference.IsNullOrEmpty(siteStartPageContentLink) &&
+                (siteDefinitionToUpdate.ForceLogin ||
+                 (siteDefinitionToUpdate.SetRoles != null && siteDefinitionToUpdate.SetRoles.Any()) ||
+                 (siteDefinitionToUpdate.RemoveRoles != null && siteDefinitionToUpdate.RemoveRoles.Any())))
+            {
+                var existingDescriptor = _contentSecurityRepository.Get(siteStartPageContentLink);
+
+                if (existingDescriptor != null)
+                {
+                    var securityDescriptor = (IContentSecurityDescriptor)existingDescriptor.CreateWritableClone();
+
+                    if (securityDescriptor.IsInherited)
+                    {
+                        securityDescriptor.IsInherited = false;
+                    }
+
+                    var existingEntries = GetExistingAce(securityDescriptor);
+
+                    if (siteDefinitionToUpdate.SetRoles != null && siteDefinitionToUpdate.SetRoles.Any())
+                    {
+                        SetRoles(existingEntries, siteDefinitionToUpdate);
+                    }
+
+                    if (siteDefinitionToUpdate.RemoveRoles != null && siteDefinitionToUpdate.RemoveRoles.Any())
+                    {
+                        RemoveRoles(existingEntries, siteDefinitionToUpdate);
+                    }
+
+                    if (siteDefinitionToUpdate.ForceLogin)
+                    {
+                        Logger.Debug($"Start ForceLogin.");
+                        RemoveRole(existingEntries, new RemoveRoleDefinition { Name = "Everyone" }, siteDefinitionToUpdate.Name);
+                    }
+
+                    SetAce(securityDescriptor, existingEntries);
+
+                    _contentSecurityRepository.Save(siteStartPageContentLink, securityDescriptor, SecuritySaveType.Replace);
+                    _contentSecurityRepository.Save(siteStartPageContentLink, securityDescriptor, SecuritySaveType.ReplaceChildPermissions);
+
+                }
+                else
+                {
+                    Logger.Error($"Could not get a security descriptor from {WebsiteDefinitionType} {website.Name} startpage.");
+                }
+            }
+        }
+
+        private Application GetExistingSiteDefinition(IEnumerable<Application> existingSites, EnvironmentSynchronizerSiteDefinition siteDefinitionToUpdate)
+        {
+            if (string.IsNullOrEmpty(siteDefinitionToUpdate.Id))
+            {
+                return existingSites.FirstOrDefault(application => string.Equals(application.DisplayName, siteDefinitionToUpdate.Name, StringComparison.OrdinalIgnoreCase));
+            }
+
+            return existingSites.FirstOrDefault(application => string.Equals(application.Name, siteDefinitionToUpdate.Id, StringComparison.Ordinal));
+        }
+
+        private List<AccessControlEntry> GetExistingAce(IContentSecurityDescriptor securityDescriptor)
+        {
+            return securityDescriptor.Entries.ToList();
+        }
+
+        private void SetAce(IContentSecurityDescriptor securityDescriptor, IEnumerable<AccessControlEntry> existingEntries)
+        {
+            securityDescriptor.Clear();
+            foreach (var entry in existingEntries)
+            {
+                securityDescriptor.AddEntry(entry);
+            }
+        }
+
+        private void SetRoles(List<AccessControlEntry> existingEntries, EnvironmentSynchronizerSiteDefinition siteDefinitionToUpdate)
+        {
+            Logger.Debug($"Start SetRoles.");
+            foreach (var role in siteDefinitionToUpdate.SetRoles)
+            {
+                var existingRole = existingEntries.FirstOrDefault(x => x.Name == role.Name);
+                if (existingRole != null)
+                {
+                    existingEntries.Remove(existingRole);
+                    Logger.Debug($"RemoveRole {existingRole.Name}.");
+                }
+                existingEntries.Add(new AccessControlEntry(role.Name, role.Access, SecurityEntityType.Role));
+                Logger.Debug($"SetRole {role.Name} {role.Access}.");
+                Logger.Information($"Set AccessControlEntry {role.Name} AccessLevel.{role.Access} for {WebsiteDefinitionType} {siteDefinitionToUpdate.Name}.");
+                resultLog.AppendLine($"Set AccessControlEntry {role.Name} AccessLevel.{role.Access} for {WebsiteDefinitionType} {siteDefinitionToUpdate.Name}.<br/>");
+            }
+        }
+
+        private void RemoveRoles(List<AccessControlEntry> existingEntries, EnvironmentSynchronizerSiteDefinition siteDefinitionToUpdate)
+        {
+            Logger.Debug($"Start RemoveRoles.");
+            foreach (var role in siteDefinitionToUpdate.RemoveRoles)
+            {
+                RemoveRole(existingEntries, role, siteDefinitionToUpdate.Name);
+            }
+        }
+        private void RemoveRole(List<AccessControlEntry> existingEntries, RemoveRoleDefinition removeRoleDefinition, string siteName)
+        {
+            var existingRole = existingEntries.FirstOrDefault(x => x.Name == removeRoleDefinition.Name);
+            if (existingRole != null)
+            {
+                existingEntries.Remove(existingRole);
+                Logger.Debug($"RemoveRole {existingRole.Name}.");
+                Logger.Information($"Remove AccessControlEntry {removeRoleDefinition.Name} AccessLevel.{existingRole.Access} for {WebsiteDefinitionType} {siteName}.");
+                resultLog.AppendLine($"Remove AccessControlEntry {removeRoleDefinition.Name} AccessLevel.{existingRole.Access} for {WebsiteDefinitionType} {siteName}.<br/>");
+            }
+        }
     }
 }
